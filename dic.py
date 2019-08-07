@@ -15,7 +15,6 @@ order_dic={
         }
 },
 
-q
 chat_dic={
     'order_name':'',
 
