@@ -29,7 +29,7 @@ def main():
         cn_from_username = msg.FromUserName
         cn_tousername = msg.ToUserName
         cn_text = msg.Text
-        cn_order_list={} # 字典格式为 {@fromuser:{ordername,plan_type,param_supple}
+        cn_order_list={} # 字典格式为 {@fromuser:{order_name,...}
         cn_reponse=CnMsgProcess.cn_msg_process(msg,cn_from_username,cn_order_list)
         itchat.send('返回结果:'+cn_reponse,cn_from_username)
         #
@@ -41,7 +41,9 @@ def main():
         #     else:
         #         print('【发给】'+msg.User.RemarkName+':'+msg.Text,msg.ToUserName)
 
-    itchat.auto_login(hotReload=True)
+    #itchat.auto_login(hotReload=True)
+    
+    itchat.auto_login(hotReload=True,enableCmdQR=2)
     itchat.run()
 
 
