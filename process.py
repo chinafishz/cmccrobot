@@ -2,18 +2,30 @@ from dic import order_dic,chat_dic
 
 
 class CnMsgProcess:
-    def cn_msg_process(self,cn_from_username,chat_list):
-        if chat_list.get(cn_from_username) is None:  # 先判断是否在chat_list
+    order_list=''
+    chart_list=''
+    
+    def __init__(self,msg,cn_order_list,cn_chart_list):
+        order_list=cn_order_list
+        chart_list=cn_chart_list
+
+    def cn_msg_process(self):
+        _from_username=self.fromusername
+        if chat_list.get(_from_username) is None: 
+            # 先判断是否在chat_list
+
             __text = self.Text
             if __text[0] != '#':
                 return '不是命令'
             else:
-                __text_split = __text.split(' ') # 分列后[命令,参数……]
+                __text_split = __text.split(' ') 
+                # 分列后[命令,参数……]
                 # 先判断是否为字典内的命令
-                __order_dic_search = order_dic.get(__text_split[0].lower())#返还一个字典，第一个为指令代码，第二个为次指令需要有几个参数
-                if __order_dic_search is not None: # 判定为有效的命令，才从这里真正处理指令
+                
+                if  order_dic.get(__text_split[0].lower()) is not None:
+                    # 判定为有效的命令，才从这里真正处理指令
                     
-                    #-------------
+                    # -------------
                     #
                     # param_count = order_dic_search.get('param_count') # param_count为改命令所需的参数个数
                     # for i in reversed(range(len(cn_text_split))):
@@ -31,11 +43,13 @@ class CnMsgProcess:
                     #--------------
 
                 elif __order_dic_search is None:
-                    return '不是字典里的命令'
+                    return '不是可用的命令'
         else:
-            __text=self.Text
-            if __text[0] == '#' and  chat_dic[cn_from_username].get(__text[0]) is not None:
-                __text_split = __text.split(' ')  # 分列后[命令,参数……]
+            _text=self.Text
+            if _text[0] == '#' and  chat_dic[_from_username].get(_text[0]) is None:
+                __text_split = __text.split(' ') 
+                # 分列后[命令,参数……]
+
                 __order_dic_search = order_dic.get(__text_split[0].lower())
             else:
 
