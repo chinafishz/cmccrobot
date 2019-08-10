@@ -1,5 +1,5 @@
 from dic import order_dic,chat_dic
-
+import string
 
 class CnMsgProcess:
     order_list={}
@@ -62,7 +62,7 @@ class CnMsgProcess:
         _order_dic_result = order_dic[order_name]
         # 常用数据
 
-        _param_get_property = {}
+        param_property_result = {}
         # 命令各参数查询结果
 
         if _text_split[0][0] == '#':
@@ -72,22 +72,40 @@ class CnMsgProcess:
         
             if len(_text_split) > _order_dic_result['param_count']:
                 return 'param of order need %s ,but you input %s' % (_order_dic_result['param_count'],len(_text_split))
-
-            _result_a06 = CnMsgProcess.process_a06(_text_split,_order_dic_result['property'])
-            #返回每个输入的参数的属性值
+            else:
+                _property_kinds = {}
+                _i = 0
+                while _i < _order_dic_result['param_count']:
+                    _i = _i + 1
+                    _property_kinds.update(_order_dic_result[_i].get('property'))
+                _result_a06 = CnMsgProcess.process_a06(_text_split,_property_kinds)
+                #返回每个输入的参数的属性值
 
         else:
             # Todo:a07
             return
 
 
-    def process_a06(self,param_property):
+    def process_a06(self,param_property_kinds):
         _text_split=self
-        _result={}
+        result={}
+        _i=-1
         for _param in _text_split:
-            for _property_name in param_property:
+            _i=_i+1
+            result.update(_i:{})
+            for _property_name in param_property_kinds:
                 if _property_name == 'type':
-                    return 0
+                    if str.isNumeric(_param):
+                        result[_i].update({_property_name:int})
+                    elif:
+                        # not end
+                elif _property_name == 'length':
+                    result[_i].update({_property_name:len(_param)})
+                elif _property_name == 'first_nun':
+                    result[_i].update({_property_name:_param[0]})
+        return result
+                
+
 
 
 
