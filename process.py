@@ -2,16 +2,16 @@ from dic import order_dic,chat_dic
 
 
 class CnMsgProcess:
-    order_list=''
-    chart_list=''
-    
+    order_list={}
+    chart_list={}
+
     def __init__(self,msg,cn_order_list,cn_chart_list):
-        order_list=cn_order_list
-        chart_list=cn_chart_list
+        self.order_list=cn_order_list
+        self.chart_list=cn_chart_list
 
     def cn_msg_process(self):
         _from_username=self.fromusername
-        if chat_list.get(_from_username) is None: 
+        if CnMsgProcess.chart_list.get(_from_username) is None:
             # 先判断是否在chat_list
 
             _text = self.Text
@@ -29,13 +29,13 @@ class CnMsgProcess:
                     # 判定为有效的命令，才从这里真正处理指令
                     #Todo:a05
              
-                    _result = process_a05(_text_split,_order_name)
+                    _result = CnMsgProcess.process_a05(_text_split, _order_name)
                     return _result
     
                 else:
                     return '不是可用的命令'
         else:
-            _text=self.Text
+            _text = self.Text
             if _text[0] == '#' and  chat_dic[_from_username].get(_text[0]) is None:            
                 # Todo:a01
 
@@ -46,7 +46,7 @@ class CnMsgProcess:
                 if order_dic.get(_order_name) is not None:
                     # Todo:a05
 
-                    _result = process_a05(_text_split,_order_name)
+                    _result = CnMsgProcess.process_a05(_text_split,_order_name)
                     return _result
 
                 else:
@@ -54,36 +54,40 @@ class CnMsgProcess:
 
             else:
                 # Todo:a03
+                return 0
 
 
-    def process_a05(text_split,order_name):
-        _text_split=text_split
-        _order_dic_reslut = order_dic[order_name]
+    def process_a05(self,order_name):
+        _text_split=self
+        _order_dic_result = order_dic[order_name]
         # 常用数据
 
-        if _text_split[0][0] = '#':
+        _param_get_property = {}
+        # 命令各参数查询结果
+
+        if _text_split[0][0] == '#':
             _text_split.remove(_text_split[0])
         if len(_text_split) !=0:
             # Todo:a06
         
             if len(_text_split) > _order_dic_result['param_count']:
                 return 'param of order need %s ,but you input %s' % (_order_dic_result['param_count'],len(_text_split))
-            _param_get_property={}
-            # 命令各参数查询结果
-            
-            _result_a06=process_a06(_text_split,_order_dic_result['property'])
+
+            _result_a06 = CnMsgProcess.process_a06(_text_split,_order_dic_result['property'])
             #返回每个输入的参数的属性值
 
         else:
             # Todo:a07
+            return
 
 
-    def process_a06(text_split,param_property):
+    def process_a06(self,param_property):
+        _text_split=self
         _result={}
-        for _param in text_split:
+        for _param in _text_split:
             for _property_name in param_property:
                 if _property_name == 'type':
-                    type(
+                    return 0
 
 
 

@@ -1,37 +1,37 @@
 import itchat
 from itchat.content import TEXT
 import threading
-#from process import CnMsgProcess
+from process import CnMsgProcess
 
-class mythread(threading.Thread):
-    def __init__(self,threadID,name,counter):
+
+class MyThread(threading.Thread):
+    def __init__(self, thread_id, name, counter):
         threading.Thread.__init__(self)
-        self.threadID=threadID
-        self.name=name
-        self.counter=counter
+        self.threadID = thread_id
+        self.name = name
+        self.counter = counter
 
     def run(self):
-        while(True):
-            a=input()
+        while True:
+            a = input()
             # print(a)
-            b=a.split(' ')
+            b = a.split(' ')
             # print(b)
-            if(len(b)==2):
+            if len(b) ==2:
                 itchat.send(b[1],b[0])
-            elif(len(b)==1):
+            elif len(b) == 1:
                 itchat.send(a)
 
 
-
-
-def mai(cn_process):
-    @itchat.msg_register(TEXT,isFriendChat=True) #isGroupChat=True
+def main(self):
+    @itchat.msg_register(TEXT,isFriendChat=True)
+    # isGroupChat=True
     def simple_reply(msg):
         _from_username = msg.FromUserName
-        _tousername = msg.ToUserName
+        _to_username = msg.ToUserName
         _text = msg.Text
-        _reponse=cn_process.cn_msg_process(msg)
-        
+        _response = self.cn_msg_process(msg)
+
         itchat.send('返回结果:'+_from_username)
         #
         # if(msg.FromUserName!='@146bc331344a6eedc213bed5b29fa465e26a6673b52b566f74e45fb2adf6dd9d'):
@@ -42,22 +42,20 @@ def mai(cn_process):
         #     else:
         #         print('【发给】'+msg.User.RemarkName+':'+msg.Text,msg.ToUserName)
 
-    #itchat.auto_login(hotReload=True)
+    # itchat.auto_login(hotReload=True)
     
     itchat.auto_login(hotReload=True,enableCmdQR=2)
     itchat.run()
 
 
-
-
-thread1=mythread(1,'thread-1',1)
+thread1 = MyThread(1,'thread-1',1)
 thread1.start()
 
 
 cn_order_list={}
 cn_chart_list={}
-#cn_order_list表示待办理的命令
-#cn_chart_list表示待回复的对话
+# cn_order_list表示待办理的命令
+# cn_chart_list表示待回复的对话
 
 cn_process=CnMsgProcess(cn_order_list,cn_chart_list)
 main(cn_process)
