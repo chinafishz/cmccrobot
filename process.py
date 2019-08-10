@@ -14,48 +14,101 @@ class CnMsgProcess:
         if chat_list.get(_from_username) is None: 
             # 先判断是否在chat_list
 
-            __text = self.Text
-            if __text[0] != '#':
+            _text = self.Text
+            if _text[0] != '#':
                 return '不是命令'
             else:
-                __text_split = __text.split(' ') 
+                # Todo:a01
+
+                _text_split = _text.split(' ') 
                 # 分列后[命令,参数……]
                 # 先判断是否为字典内的命令
                 
-                if  order_dic.get(__text_split[0].lower()) is not None:
+                _order_name = _text_split[0].lower()
+                if order_dic.get(_order_name) is not None:
                     # 判定为有效的命令，才从这里真正处理指令
-                    
-                    # -------------
-                    #
-                    # param_count = order_dic_search.get('param_count') # param_count为改命令所需的参数个数
-                    # for i in reversed(range(len(cn_text_split))):
-                    #     if cn_text_split[i] == ''
-                    #         cn_text_split.remove('')
-                    # if len(cn_text_split) < param_count+1: # 参数不足,需要转对话获取
-                    #     return P2VChat.type_find_first(order_dic_search,cn_text_split,chat_list,cn_from_username) # 传入字典+数组+字典：{命令，参数个数，参数字典},[命令,参数1，参数2，……],{待处理命令清单},发送人)
-                    # elif len(cn_text_split) > param_count+1:
-                    #     return str(cn_text_split[0])+'命令需要'+str(param_count)+'个参数，但实际传入了'+str(len(cn_text_split)-1)+'个,请修改'
-                    # else:
-                    #     # （待处理）有参数充足，需要核实对应的属性，无误后转对应的处理函数
-                    #     return str(order_dic_search)+','+str(cn_text_split)
-
-
-                    #--------------
-
-                elif __order_dic_search is None:
+                    #Todo:a05
+             
+                    _result = process_a05(_text_split,_order_name)
+                    return _result
+    
+                else:
                     return '不是可用的命令'
         else:
             _text=self.Text
-            if _text[0] == '#' and  chat_dic[_from_username].get(_text[0]) is None:
-                __text_split = __text.split(' ') 
+            if _text[0] == '#' and  chat_dic[_from_username].get(_text[0]) is None:            
+                # Todo:a01
+
+                _text_split = _text.split(' ') 
                 # 分列后[命令,参数……]
 
-                __order_dic_search = order_dic.get(__text_split[0].lower())
+                _order_name = _text_split[0].lower()
+                if order_dic.get(_order_name) is not None:
+                    # Todo:a05
+
+                    _result = process_a05(_text_split,_order_name)
+                    return _result
+
+                else:
+                    return '不是可用的命令'
+
             else:
+                # Todo:a03
+
+
+    def process_a05(text_split,order_name):
+        _text_split=text_split
+        _order_dic_reslut = order_dic[order_name]
+        # 常用数据
+
+        if _text_split[0][0] = '#':
+            _text_split.remove(_text_split[0])
+        if len(_text_split) !=0:
+            # Todo:a06
+        
+            if len(_text_split) > _order_dic_result['param_count']:
+                return 'param of order need %s ,but you input %s' % (_order_dic_result['param_count'],len(_text_split))
+            _param_get_property={}
+            # 命令各参数查询结果
+            
+            _result_a06=process_a06(_text_split,_order_dic_result['property'])
+            #返回每个输入的参数的属性值
+
+        else:
+            # Todo:a07
+
+
+    def process_a06(text_split,param_property):
+        _result={}
+        for _param in text_split:
+            for _property_name in param_property:
+                if _property_name == 'type':
+                    type(
+
+
+
 
 
         # cn_nickname=msg.NickName #单聊好似没有这个
 
+
+
+
+
+# -------------
+                    #                                                                                # param_count = order_dic_search.get('param_count') # param_c
+ount为改命令所需的参数个数
+                    # for i in reversed(range(len(cn_text_split))):
+                    #     if cn_text_split[i] == ''
+                    #         cn_text_split.remove('')                                               # if len(cn_text_split) < param_count+1: # 参数不足,需要转对>话获取                                                                                               #     return P2VChat.type_find_first(order_dic_search,cn_text
+_split,chat_list,cn_from_username) # 传入字典+数组+字典：{命令，参数个数，参数字>
+典},[命令,参数1，参数2，……],{待处理命令清单},发送人)                                                 # elif len(cn_text_split) > param_count+1:
+                    #     return str(cn_text_split[0])+'命令需要'+str(param_count
+)+'个参数，但实际传入了'+str(len(cn_text_split)-1)+'个,请修改'
+                    # else:
+                    #     # （待处理）有参数充足，需要核实对应的属性，无误后转对>应的处理函数
+                    #     return str(order_dic_search)+','+str(cn_text_split)
+                                                                                                     #--------------
 
 
 
