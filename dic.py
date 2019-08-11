@@ -1,25 +1,26 @@
 import json
 
-order_dic={
+order_dic = {
     # 1001~1100 分配为查询用途
-    '#puk':{
+    '#puk':
+        {
             'id': 1001,
             'param_count': 1,
             1: {
                 'name': 'phoneNum',
-                'property':{'type': int,'length':[13,11],'first_num':'1'},
+                'property': {'type': int, 'length': [13,11], 'first_num': '1'},
                 }
-            },
-
+        },
     '#查实名':
         {
             'id': 1002,
             'param_count': 1,
             1: {'param_name': '电话号码', 'param_type': int},
         }
-},
+}
 
-chat_dic={
+
+chat_dic = {
     'order_name':'',
 
 }
