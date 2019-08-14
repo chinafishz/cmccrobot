@@ -17,12 +17,6 @@ order_dic = {
             'param_count': 1,
             1: {'param_name': '电话号码', 'param_type': int},
         }
-}
-
-
-chat_dic = {
-    'order_name':'',
-
-}
+        }
 
 

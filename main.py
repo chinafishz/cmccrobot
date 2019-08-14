@@ -30,7 +30,7 @@ def main(self):
         _from_username = msg.FromUserName
         _to_username = msg.ToUserName
         _text = msg.Text
-        _response = CnMsgProcess.cn_msg_process(msg)
+        _response = self.cn_msg_process(msg)
         if _response is not None:
             itchat.send('@'+msg.User.NickName+' '+_response)
         #a.setdefault('chinafishz',{'ordername':'#puk','param':{}}).setdefault('param',{'c':3,'b':2}).update({'c':3,'b':2})
@@ -42,8 +42,8 @@ def main(self):
         #     else:
         #         print('【发给】'+msg.User.RemarkName+':'+msg.Text,msg.ToUserName)
 
-    itchat.auto_login(hotReload=True)
-    # itchat.auto_login(hotReload=True,enableCmdQR=2)
+    # itchat.auto_login(hotReload=True)
+    itchat.auto_login(hotReload=True,enableCmdQR=2)
 
     itchat.run()
 
