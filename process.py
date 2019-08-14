@@ -12,9 +12,10 @@ class CnMsgProcess:
     def cn_msg_process(self,msg):
         _from_username = msg.FromUserName
         _text = msg.Text.strip()
-        _text_split = _text.split(' ')                                                          # 分列后[命令,参数……]                                                                   # 先判断是否为字典内的命令
+        _text_split = _text.split(' ')
+        # 分列后[命令,参数……]
+        # 先判断是否为字典内的命令
 
-        
         while ' ' in _text_split:
             _text_split.remove(' ')
         _order_name = _text_split[0].lower()
@@ -56,52 +57,49 @@ class CnMsgProcess:
         # a05:
 
         _result_process_a05 = CnMsgProcess.process_a05(_text_split, _order_name)
+        print(_result_process_a05)
         # 获取输入的参数对比命令要求后参数的结果
         # 格式为： {1:'abc',3:'cde'……}
 
         if _result_process_a05 is None:
-             return '%s的参数不正确' % _order_name
+            return '%s的参数不正确' % _order_name
+        elif _result_process_a05[0] == 'error401':
+            return  '该命令需要输入%s个参数，但实际输入了%s个' % (_result_process_a05[1],_result_process_a05[2])
         # else:
-            
-        #test code
 
         _param_operation_dic = {}
+        # _param_operation_dic 为合并到chat_dic或order_dic前的过渡字典
+
         for _i in range(order_dic.get(_order_name)['param_count']):
-        # _i 是从0开始，而_result_process_a05的格式为：{1: '12345678901'}
-        # 所以需要_i+1
-            print(_result_process_a05)
+            #  _i 是从0开始，而_result_process_a05的格式为：{1: '12345678901'}
+            # 所以需要_i+1
+
             if _result_process_a05.get(_i+1) is not None:
+                # 仅在参数输入有效的情况下生效，其他情况返回的是文字错误
+
                 _param_operation_dic.update({_i: _result_process_a05.get(_i+1)})
+                self.chat_list.setdefault(_from_username, {}).setdefault(_order_name, {}).update(_param_operation_dic)
+                # 将本次输入的参数合并到对话列表中，如果有新增则补充，重复也覆盖，没涉及到的则不影响
+                # 格式为：{fromusernane:{order name:{1:'ABC',3•••}}}
+                # 格式为：{1:'ABC',3:...} 2没数值，所以留空
+
             else:
                 pass
-            # _param_operation_dic 为合并到chat_dic或order_dic前的过渡字典
-            # 格式为：{1:'ABC',3:...} 2没数值，所以留空
-        
-        self.chat_list.setdefault(_from_username,{}).setdefault(_order_name,{}).update(_param_operation_dic)
-        # 将本次输入的参数合并到对话列表中，如果有新增则补充，重复也覆盖，没涉及到的则不影响
-        # 格式为：{fromusernane:{order name:{1:'ABC',3•••}}}
 
-#        if len(self.chat_list.get(_from_username).get(_order_name)) == 
-
-
-
+#        if len(self.chat_list.get(_from_username).get(_order_name)) ==
 
     def process_a05(self,order_name):
         _text_split=self
         _order_dic_result = order_dic[order_name]
         # 常用数据
-        print('101')
-        param_property_result = {}
-        # 命令各参数查询结果
 
         if _text_split[0][0] == '#':
             _text_split.remove(_text_split[0])
-            print('102'+str(_text_split))
         if len(_text_split) != 0:
             # Todo:a06
-            print(_order_dic_result['param_count'])
+
             if len(_text_split) > _order_dic_result['param_count']:
-                return 'param of order need %s ,but you input %s' % (_order_dic_result['param_count'], len(_text_split))
+                return ['error401',_order_dic_result['param_count'], len(_text_split) ]
             else:
                 _property_kinds = {}
                 _i = 0
@@ -124,7 +122,7 @@ class CnMsgProcess:
         else:
             # Todo:a07
             print('todo07')
-            return
+            pass
 
     def process_a06(self,param_property_kinds):
         _text_split = self
