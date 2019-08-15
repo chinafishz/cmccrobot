@@ -56,7 +56,7 @@ class CnMsgProcess:
         
         # a05:
 
-        _result_process_a05 = CnMsgProcess.process_a05(_text_split, _order_name)
+        _result_process_a05 = CnMsgProcess.process_a05(_text_split)
         print(_result_process_a05)
         # 获取输入的参数对比命令要求后参数的结果
         # 格式为： {1:'abc',3:'cde'……}
@@ -98,24 +98,33 @@ class CnMsgProcess:
                     _result = _result + ' ' + self.chat_list.get(_from_username).get(_order_name).get(_i)
             return _result
 
-    def process_a05(self,order_name):
-        _text_split=self
+    def process_a05(self):
+        # 获取输入的参数对比命令要求后参数的结果
+
+        _text_split = self
+        order_name = _text_split[0]
         _order_dic_result = order_dic[order_name]
+        # _order_dic_result = {'id': 1001,'param_count': 1,1: {'name': 'phoneNum','property': {'type': int,
+        #                      'length': [13,11], 'first_num': '1'}}
+
         # 常用数据
 
         if _text_split[0][0] == '#':
-            _text_split.remove(_text_split[0])
+            _text_split.remove(order_name)
         if len(_text_split) != 0:
             # Todo:a06
 
-            if len(_text_split) > _order_dic_result['param_count']:
-                return ['error401',_order_dic_result['param_count'], len(_text_split) ]
+            _param_count = _order_dic_result['param_count']
+            if len(_text_split) > _param_count:
+                return ['error401',_param_count, len(_text_split) ]
             else:
                 _property_kinds = {}
                 _i = 0
-                while _i < _order_dic_result['param_count']:
+                while _i < _param_count:
                     _i = _i + 1
                     _property_kinds.update(_order_dic_result[_i].get('property'))
+                    # 将所有属性放在一个字典里面，每个参数都LOAD一次这个属性，及时用不着
+
                 _result_a06 = CnMsgProcess.process_a06(_text_split, _property_kinds)
                 # 返回每个输入的参数的属性值
 
