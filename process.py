@@ -52,7 +52,7 @@ class CnMsgProcess:
 
             else:
                 # Todo:a03
-                return "ToDo:a03"
+                return _text+"ToDo:a03"
         
         # a05:
 
@@ -74,7 +74,7 @@ class CnMsgProcess:
         for _i in range(order_dic.get(_order_name)['param_count']):
             #  _i 是从0开始，而_result_process_a05的格式为：{1: '12345678901'}
             # 所以需要_i+1
-
+            print(_result_process_a05)
             if _result_process_a05.get(_i+1) is not None:
                 # 仅在参数输入有效的情况下生效，其他情况返回的是文字错误
 
@@ -87,7 +87,16 @@ class CnMsgProcess:
             else:
                 pass
 
-#        if len(self.chat_list.get(_from_username).get(_order_name)) ==
+        if len(self.chat_list.get(_from_username).get(_order_name)) == order_dic.get(_order_name)['param_count']:
+            return ['operate_ok',_from_username,_order_name]
+        else:
+            _result = '缺参数：%s ' % _order_name
+            for _i in range(len(order_dic.get(_order_name)['param_count'])):
+                if self.chat_list.get(_from_username).get(_order_name).get(_i) == None:
+                    _result = _result + ' ' + order_dic.get(_order_name).get(_i).get('name')
+                else:
+                    _result = _result + ' ' + self.chat_list.get(_from_username).get(_order_name).get(_i)
+            return _result
 
     def process_a05(self,order_name):
         _text_split=self
@@ -207,9 +216,8 @@ class CnMsgProcess:
                 for _k in _param_id_property.items():
                     # _k格式为：('type',int)  ('length',[11,13])
 
-                    if type(_k[1]) == list:
-                        if _input.get(_k[0]) not in _k[1]:
-                            _is_match = 0
+                    if type(_k[1]) == list and  _input.get(_k[0]) not in _k[1]:
+                         _is_match = 0
                     else:
                         if _k[1] != _input.get(_k[0]):
                             _is_match = 0
@@ -219,7 +227,8 @@ class CnMsgProcess:
                 if _is_match == 1:
                     match_result.update({_i: _j})
                     break
-
+        print(match_result)
+        print('6')
         return match_result
 
 

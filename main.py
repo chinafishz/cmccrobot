@@ -31,8 +31,13 @@ def main(self):
         _to_username = msg.ToUserName
         _text = msg.Text
         _response = self.cn_msg_process(msg)
-        if _response is not None:
+        if _response is  None:
+            pass
+        elif type(_response) == list:
+            print('banli')
+        else:
             itchat.send('@'+msg.User.NickName+' '+_response)
+        
         # a.setdefault('chinafishz',{'ordername':'#puk','param':{}}).setdefault('param',{'c':3,'b':2}).update({'c':3,'b':2})
         # if(msg.FromUserName!='@146bc331344a6eedc213bed5b29fa465e26a6673b52b566f74e45fb2adf6dd9d'):
         #     print('【接收】'+msg.User.RemarkName+':'+msg.Text,msg.FromUserName)

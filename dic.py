@@ -14,9 +14,16 @@ order_dic = {
     '#查实名':
         {
             'id': 1002,
-            'param_count': 1,
-            1: {'param_name': '电话号码', 'param_type': int},
+            'param_count': 3,
+            1: {
+                'name': 'phoneNum',
+                'property': {'type': int, 'length': [13,11], 'first_num': '1'},                                 },
+            2: {
+                'name': 'phoneNum2',
+                'property': {'type': int, 'length': [13,11], 'first_num': '1'},                                 },
+            3: {                                                                                                'name': 'phoneNum2',
+                'property': {'type': int, 'length': [13,11], 'first_num': '1'},                                 }
         }
-        }
+    }
 
 
