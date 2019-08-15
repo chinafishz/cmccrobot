@@ -2,7 +2,7 @@ import itchat
 from itchat.content import TEXT
 import threading
 from process import CnMsgProcess
-
+import platform
 
 class MyThread(threading.Thread):
     def __init__(self, thread_id, name, counter):
@@ -42,8 +42,10 @@ def main(self):
         #     else:
         #         print('【发给】'+msg.User.RemarkName+':'+msg.Text,msg.ToUserName)
 
-    itchat.auto_login(hotReload=True)
-    # itchat.auto_login(hotReload=True,enableCmdQR=2)
+    if platform.machine() != 'aarch64':
+        itchat.auto_login(hotReload=True)
+    else:
+        itchat.auto_login(hotReload=True,enableCmdQR=2)
 
     itchat.run()
 

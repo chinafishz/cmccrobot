@@ -63,8 +63,9 @@ class CnMsgProcess:
 
         if _result_process_a05 is None:
             return '%s的参数不正确' % _order_name
-        elif _result_process_a05[0] == 'error401':
-            return  '该命令需要输入%s个参数，但实际输入了%s个' % (_result_process_a05[1],_result_process_a05[2])
+        elif type(_result_process_a05) == list:
+            if _result_process_a05[0] == 'error401':
+                return  '该命令需要输入%s个参数，但实际输入了%s个' % (_result_process_a05[1],_result_process_a05[2])
         # else:
 
         _param_operation_dic = {}
