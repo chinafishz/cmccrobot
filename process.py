@@ -123,7 +123,7 @@ class CnMsgProcess:
                 while _i < _param_count:
                     _i = _i + 1
                     _property_kinds.update(_order_dic_result[_i].get('property'))
-                    # 将所有属性放在一个字典里面，每个参数都LOAD一次这个属性，及时用不着
+                    # 将所有属性放在一个字典里面，每个参数都LOAD一次这个属性，即使用不着
 
                 _result_a06 = CnMsgProcess.process_a06(_text_split, _property_kinds)
                 # 返回每个输入的参数的属性值
@@ -187,7 +187,7 @@ class CnMsgProcess:
         #         'property': {'type': int, 'length': [13, 11], 'first_num': '1'},
         #     },
         #     2:{
-        #         'name': '……',
+        #         'name': '……',\
         #         'property':'……'
         #     }
         # }
@@ -197,7 +197,7 @@ class CnMsgProcess:
 
         _i = 0
         while _i < _order_require['param_count']:
-            # 思路：目前采用忽略多余的输入参数，即加入输入参数不匹配，不报错，只保存匹配的参数
+            # 思路：目前采用忽略多余的输入参数，即假如输入参数不匹配，不报错，只保存匹配的参数
             #     并在之后的步骤a0X找到那些命令参数还没有数值。
             _i = _i + 1
             _param_id = _order_require[_i]
@@ -210,6 +210,9 @@ class CnMsgProcess:
 
             for _j in _input_property:
                 # _j 为输入参数的id
+                print(_input_property)
+
+                print[_j]
 
                 _input = _input_property[_j]
                 # 输入的参数属性种类明细
@@ -224,20 +227,24 @@ class CnMsgProcess:
 
                 for _k in _param_id_property.items():
                     # _k格式为：('type',int)  ('length',[11,13])
-
-                    if type(_k[1]) == list and  _input.get(_k[0]) not in _k[1]:
-                         _is_match = 0
+                    
+                    if type(_k[1]) == list:
+                        if _input.get(_k[0]) not in _k[1]:
+                            print(_k[1],_input,_k[0],_input.get(_k[0]))
+                        
+                            _is_match = 0
                     else:
                         if _k[1] != _input.get(_k[0]):
+                            print(_input,_k)
                             _is_match = 0
 
                 # 如果循环结束后_is_match还是1,证明地_j个输入参数符合第_i个命令参数的全部要求
-
+                print(_is_match == 1)
                 if _is_match == 1:
+                    _input_property[_j] = {}
                     match_result.update({_i: _j})
                     break
         print(match_result)
-        print('6')
         return match_result
 
 
