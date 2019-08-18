@@ -1,7 +1,6 @@
 import cn_system
 from dic import order_dic
-from iot_system import IotSystem
-
+import iot_system
 
 
 def process_a05(_split):
@@ -82,7 +81,6 @@ def process_a06(_text_split, param_property_kinds):
 
 
 def process_a08(_input_property, _order_require):
-
     # input_property：输入参数的属性种类字典，_text_split顺序一致
     # 格式例子：
     # {
@@ -156,51 +154,16 @@ def process_a08(_input_property, _order_require):
     return match_result
 
 
-def cn_cmcc_process(_r, _order_name, _order_param):
-    _system = order_dic.get(_order_name).get('system')
-    _actual_order = order_dic.get(_order_name).get('actual_order')
-    _proxy_load = cn_system.proxy_load()
-    if _system == 'iot':
-        _cmcc_iot = IotSystem(_r)
-        # 初始化时已经把r导入，之后的函数就不用再考虑输入r了
-
-        if test_alive(_r) == 'alive':
-            if _actual_order == '#puk':
-                _result = iot_status(_r, _order_param.get(1), _proxy_load[0], _proxy_load[1])
-                pass
-        else:
-            # 4a login
-
-
-            send_sms1 = '41608446240A6782F2A0F031426EDC066CF24674F3F0586A4D5FF056D75FF4AB'
-            send_sms2 = '41608446240A6782F2A0F031426EDC066CF24674F3F0586AF1E3983438A09296B93FF648FA4937967A053D1D504E42BA6069ED5C9B03B580'
-
-            loginForm = cn_system.login_4a_1(_r, send_sms1, send_sms2, _proxy_load[0], _proxy_load[1])
-            return '4a_login_up', loginForm
-
-    elif _system == 'ESOP':
-        pass
-
-    elif _system == '4a':
-        if _actual_order == '#4a_sms':
-
-            cn_pwd_saw = 'qWer1@34'
-            _system_name_list = cn_system.login_4a_2(_r, cn_pwd_saw, _order_param.get(1), _order_param.get(2), _proxy_load[0], _proxy_load[1])
-            if _system_name_list is None:
-                return 'error402','登陆失败'
-            return '4a_login_up_success', _system_name_list
-        elif _actual_order == '#4a_iot':
-            s = cn_system.iot_login(_r, _order_param.get(1), _proxy_load[0], _proxy_load[1])
-            return ['iot_login_up']
-
-
-
 class CnMsgProcess:
-    def __init__(self, cn_order_list, cn_chat_list):
+    def __init__(self, cn_order_list, cn_chat_list, cn_config_list, r):
         self.order_list = cn_order_list
         self.chat_list = cn_chat_list
         # order_list = {}
         # chat_list = {}
+
+        self.config_list = cn_config_list
+        self.r = r
+        self.proxy_load = cn_system.proxy_load()
 
     def cn_msg_process(self, msg):
         _from_username = msg.FromUserName
@@ -222,16 +185,16 @@ class CnMsgProcess:
 
             else:
                 # Todo:a01
-        
+
                 if order_dic.get(_order_name) is not None:
                     # 判定为有效的命令，才从这里真正处理指令`
                     # Todo:a05
-             
+
                     pass
                     # 多个分支汇总到a05
 
                 else:
-                    return '%s不是可用的命令' % _order_name
+                    return ['error', '%s不是可用的命令' % _order_name]
         else:
             if _text[0] == '#' and self.chat_list[_from_username].get(_text[0]) is None:
                 # Todo:a01
@@ -243,13 +206,13 @@ class CnMsgProcess:
                     # 多个分支汇总到a05
 
                 else:
-                    return '不是可用的命令'
+                    return ['error', '不是可用的命令']
 
             else:
                 # Todo:a03
                 # 日后再补充
                 return None
-        
+
         # a05:
 
         _result_process_a05 = process_a05(_split)
@@ -258,10 +221,10 @@ class CnMsgProcess:
         # 如果是错误信息，返回类型为tuple
 
         if _result_process_a05 is None:
-            return '%s的参数不正确' % _order_name
+            return ['error', '%s的参数不正确' % _order_name]
         elif type(_result_process_a05) == tuple:
             if _result_process_a05[0] == 'error401':
-                return '该命令需要输入%s个参数，但实际输入了%s个' % (_result_process_a05[1], _result_process_a05[2])
+                return ['error', '该命令需要输入%s个参数，但实际输入了%s个' % (_result_process_a05[1], _result_process_a05[2])]
             # elif:
         # else:
 
@@ -272,10 +235,10 @@ class CnMsgProcess:
             #  _i 是从0开始，而_result_process_a05的格式为：{1: '12345678901'}
             # 所以需要_i+1
 
-            if _result_process_a05.get(_i+1) is not None:
+            if _result_process_a05.get(_i + 1) is not None:
                 # 仅在参数输入有效的情况下生效，其他情况返回的是文字错误
 
-                _param_operation_dic.update({_i+1:  _result_process_a05.get(_i+1)})
+                _param_operation_dic.update({_i + 1: _result_process_a05.get(_i + 1)})
                 # 格式为：{1:'ABC',3:...} 2没数值，所以留空
 
                 self.chat_list.setdefault(_from_username, {}).setdefault(_order_name, {}).update(_param_operation_dic)
@@ -293,9 +256,127 @@ class CnMsgProcess:
             _result = '错误（缺参数），命令格式为：@|@ %s ' % _order_name
             for _i in range(order_dic.get(_order_name)['param_count']):
                 if self.chat_list.get(_from_username).get(_order_name).get(_i + 1) is None:
-                    _result = _result + ' ' + order_dic.get(_order_name).get(_i+1).get('name')
+                    _result = _result + ' ' + order_dic.get(_order_name).get(_i + 1).get('name')
                 else:
-                    _result = _result + ' ' + self.chat_list.get(_from_username).get(_order_name).get(_i+1)
-            return _result
+                    _result = _result + ' ' + self.chat_list.get(_from_username).get(_order_name).get(_i + 1)
+            return ['error', _result]
 
+    def cmcc_process(self, _response):
+        # _response 格式为 ['operate_ok', _from_username, _order_name, order_param] 或 none 或 文字
 
+        if _response is None :
+            return None
+        elif _response[0] == 'error':
+            return 'error', _response[1]
+        elif type(_response) is list and _response[0] == 'operate_ok':
+            self.chat_to_order(_response)
+            _order_name = _response[2]
+            _order_param = _response[3]
+            _from_username = _response[1]
+            _cmcc_system_name = order_dic.get(_order_name).get('system')
+            _actual_order = order_dic.get(_order_name).get('actual_order')
+            _proxies = self.proxy_load[0]
+            _auth = self.proxy_load[1]
+            _r = self.r
+            _order_list = self.order_list
+            _chat_list = self.chat_list
+            _config_list = self.config_list
+
+        if _cmcc_system_name == 'iot':
+            # 初始化时已经把r导入，之后的函数就不用再考虑输入r了
+
+            if _config_list.setdefault('iot_loginning', 0) == 1:
+                return 'hurry','有新的指令，但iot系统仍没登陆'
+            if iot_system.test_alive(_r, _proxies, _auth) != 'alive':
+                # 4a login
+                send_sms1 = '41608446240A6782F2A0F031426EDC066CF24674F3F0586A4D5FF056D75FF4AB'
+                send_sms2 = '41608446240A6782F2A0F031426EDC066CF24674F3F0586AF1E3983438A09296B93FF648FA4937967A053D1D504E42BA6069ED5C9B03B580'
+                loginForm = cn_system.login_4a_1(_r, send_sms1, send_sms2, _proxies, _auth)
+                # 返回值是tuple
+                self.config_list['iot_loginning'] = 1
+                # 其他同类命令则不再操作登陆系统
+
+                return '4a_login_up', loginForm
+
+            # 如果系统没登出，则继续处理指令
+
+            if _actual_order == '#iot_puk':
+                try:
+                    iot_system.iot_phone_query_base(_r, _order_param.get(1), _proxies, _auth)
+                    _result = iot_system.iot_puk(_r, _proxies, _auth)
+                    # iot_status(_r, phone_num, _proxies, _auth)
+                except:
+                    return 'error', _order_param.get(1) + '的puk查询失败，没有查询结果，请检查输入的号码'
+                else:
+                    del self.order_list[_from_username][_order_name]
+                    return 'success', _order_param.get(1) + 'puk为：' + _result
+            elif _actual_order == '#iot_status':
+                try:
+                    _result = iot_system.iot_status(_r, _order_param.get(1), _proxies, _auth)
+                    # iot_status(_r, phone_num, _proxies, _auth)
+                except:
+                    return 'error', _order_param.get(1) + '的状态查询失败，没有查询结果，请检查输入的号码'
+                else:
+                    del self.order_list[_from_username][_order_name]
+                    return 'success', _order_param.get(1) + '状态为：' + _result
+        elif _cmcc_system_name == 'ESOP':
+            pass
+
+        elif _cmcc_system_name == '4a':
+            if _actual_order == '#4a_sms':
+                cn_pwd_saw = 'qWer1@34'
+                _result = cn_system.login_4a_2(_r, cn_pwd_saw, _order_param.get(1), _order_param.get(2), _proxies,
+                                               _auth)
+                # login_4a_2(r, cn_pwd_saw, sms_pwd, loginForm2, _proxies, _auth)
+                # 返回值是tuple 或者 none
+                if _result is None:
+                    return 'error', '登陆失败'
+                del self.order_list[_from_username][_order_name]
+                return '4a_login_up_success', _result
+                # 直接返回结果，由main处理
+
+            elif _actual_order == '#4a_iot':
+                s = cn_system.iot_login(_r, _order_param.get(1), _proxies, _auth)
+                # iot_login(r, _system_name_id, _proxies, _auth)
+
+                if self.config_list.setdefault('iot_loginning',0) == 1:
+                    self.config_list['iot_loginning'] = 0
+                del self.order_list[_from_username][_order_name]
+                return 'iot_login_up', 1
+            elif _actual_order == '#4a_login_clone':
+                send_sms1 = '41608446240A6782F2A0F031426EDC066CF24674F3F0586A4D5FF056D75FF4AB'
+                send_sms2 = '41608446240A6782F2A0F031426EDC066CF24674F3F0586AF1E3983438A09296B93FF648FA4937967A053D1D504E42BA6069ED5C9B03B580'
+                loginForm = cn_system.login_4a_1(_r, send_sms1, send_sms2, _proxies, _auth)
+                # 返回值是tuple
+                del self.order_list[_from_username][_order_name]
+                return '4a_login_up', loginForm
+
+    def chat_to_order(self, _response,):
+        # _response 格式为 ['operate_ok', _from_username, _order_name, order_param]
+
+        if _response[0] != 'operate_ok':
+            return
+        _from_username = _response[1]
+        _order_name = _response[2]
+        _order_param = _response[3]
+        if self.order_list.get(_from_username) is not None:
+            self.order_list[_from_username][_order_name] = _order_param
+        else:
+            self.order_list.setdefault(_from_username,{_order_name:_order_param})
+        if self.chat_list[_from_username].get(_order_name) is not None:
+            del self.chat_list[_from_username][_order_name]
+
+    def deal_todo_order(self,_system, _from_username):
+        # order_list 格式为 {fromusername:{ordername:{1:数值,2:数值……}}}
+
+        for _from_username in self.order_list.items():
+            # _from_username格式为：（_from_username,{ordername:{1:数值,2:数值……})
+
+            for _order_name in _from_username[1].items():
+                # _order_name 格式为：（ordername,{1:数值,2:数值……})
+                if order_dic.get(_order_name[0]).get('system') == _system:
+                    # ['operate_ok', _from_username, _order_name, order_param]
+
+                    return ['operate_ok', _from_username[0], _order_name[0], _order_name[1]]
+
+        return None

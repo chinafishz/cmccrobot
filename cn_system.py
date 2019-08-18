@@ -81,18 +81,16 @@ def login_4a_2(r, cn_pwd_saw, sms_pwd, loginForm2, _proxies, _auth):
              'passWord': '', 'tokenName': cn_name, 'isUsePin': 'true', 'updatePin': 'false', 'tokenpassword': '',
              'pinCode': '', 'smsName': cn_name, 'smsPwd': cn_pwd_saw, 'dynamic_smsPwd': sms_pwd, 'checkCodeTemp': '',
              'figerName': '', 'challengeName': 'cn_name', 'challegePassword': '', 'vpn': ''}
-    s=r.post(url, data=param, headers=header, verify=False, proxies=_proxies, auth=_auth)
+    result = r.post(url, data=param, headers=header, verify=False, proxies=_proxies, auth=_auth)
 
     param = {'method': 'pageQuery',
                '_gt_json': '{"recordType":"object","pageInfo":{"totalRowNum":-1,"pageSize":50,"pageNum":1,"totalPageNum":0,"startRowNum":0,"endRowNum":0},"columnInfo":[{"id":"id","header":"资源ID","fieldName":"id","fieldIndex":"id","sortOrder":null,"hidden":true,"exportable":true,"printable":true},{"id":"hasDueAcc","header":"hasDueAcc","fieldName":"hasDueAcc","fieldIndex":"hasDueAcc","sortOrder":null,"hidden":true,"exportable":true,"printable":true},{"id":"groupName","header":"资源组","fieldName":"groupName","fieldIndex":"groupName","sortOrder":null,"hidden":false,"exportable":true,"printable":true},{"id":"name","header":"资源名称","fieldName":"name","fieldIndex":"name","sortOrder":null,"hidden":false,"exportable":true,"printable":true},{"id":"ip","header":"IP地址","fieldName":"ip","fieldIndex":"ip","sortOrder":null,"hidden":false,"exportable":true,"printable":true},{"id":"restype","header":"资源类型","fieldName":"restype","fieldIndex":"restype","sortOrder":null,"hidden":true,"exportable":true,"printable":true},{"id":"appResAccountList","header":"从帐号列表","fieldName":"id","fieldIndex":"id","sortOrder":null,"hidden":false,"exportable":true,"printable":true},{"id":"ssoMode","header":"ssoMode","fieldName":"ssoMode","fieldIndex":"ssoMode","sortOrder":null,"hidden":"true","exportable":true,"printable":true},{"id":"sysResClientList","header":"登录","fieldName":"id","fieldIndex":"id","sortOrder":null,"hidden":false,"exportable":true,"printable":true},{"id":"opt","header":"操作","fieldName":"id","fieldIndex":"id","sortOrder":null,"hidden":false,"exportable":true,"printable":true}],"sortInfo":[],"filterInfo":[],"parameters":{},"action":"load"}',
                'queryName': '', 'queryIP': '', 'isQuerySubTree': '1'}
-    result = r.post('https://4a.gmcc.net/page/resource/appres/appresourceQuery.do', data=param, headers=header,
-                     verify=False, proxies=_proxies, auth=_auth)
+    result = r.post('https://4a.gmcc.net/page/resource/appres/appresourceQuery.do', data=param, headers=header, verify=False, proxies=_proxies, auth=_auth)
     if result.url == 'https://4a.gmcc.net/error/error.jsp':
         return None
     json2 = json.loads(result.text)
-
-    _system_name_list=''
+    _system_name_list = ''
     for i in json2.get('data'):
         _name = i.get('name')
         _appResAccountList = i.get('appResAccountList').split('|')[0][:-1]
@@ -124,7 +122,7 @@ def iot_login(r, _system_name_list, _proxies, _auth):
     url = 'https://4a.gmcc.net/sso.do?method=appssoData&accID=' + appResAccountList + '&resID=' + id_num + '&softname=webAppByIE&date=' + str(
         time.time()).replace('.', '') + str(random.randint(1, 9))
     s = r.get(url, headers=header, allow_redirects=True, verify=False, proxies=_proxies, auth=_auth)
-    return ['success']
+    return 'success', 'iot'
 
 
 
