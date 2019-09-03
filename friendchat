@@ -1,0 +1,9 @@
+
+ 'FromUserName' (140524504202864) = {str} '@a37a7e6c965e0fa950f6755992b2d14fdcffa823dad65a14c1d83c6f425efdfe'
+ 'ToUserName' (140524505383216) = {str} '@374c5730f0493d460a1d73d28cdbe59a4d16e61ce5fdf968bc2c53253fbed88d'
+ 'CreateTime' (140524505383344) = {int} 1566031548
+
+
+ 
+ 'User' (140524561468472) = {User} {'MemberList': <ContactList: []>, 'Uin': 0, 'UserName': '@a37a7e6c965e0fa950f6755992b2d14fdcffa823dad65a14c1d83c6f425efdfe', 'NickName': '贤贤娃',  'ContactFlag': 65539, 'MemberCount': 0, 'RemarkName': '自己2', 'HideInputBarFlag': 0, 'Sex': 0, 'Signature': '', 'VerifyFlag': 0, 'OwnerUin': 0, 'PYInitial': 'XXW', 'PYQuanPin': 'xianxianwa', 'RemarkPYInitial': 'ZJ2', 'RemarkPYQuanPin': 'ziji2', 'StarFriend': 0, 'AppAccountFlag': 0, 'Statues': 0, 'AttrStatus': 33689861, 'Province': '', 'City': '', 'Alias': '', 'SnsFlag': 0, 'UniFriend': 0, 'DisplayName': '', 'ChatRoomId': 0, 'KeyWord': '', 'EncryChatRoomId': '', 'IsOwner': 0}
+

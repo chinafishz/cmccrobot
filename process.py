@@ -1,7 +1,11 @@
 import cn_system
 from dic import order_dic
 import iot_system
+from bs4 import BeautifulSoup
 
+send_sms1 = '41608446240A6782F2A0F031426EDC066CF24674F3F0586A4D5FF056D75FF4AB'
+send_sms2 = '41608446240A6782F2A0F031426EDC066CF24674F3F0586AF1E3983438A092961588230AE57DFFA4938B6BEDBBA3956A6069ED5C9B03B580'
+cn_pwd_saw = 'Qwer!234'
 
 def process_a05(_split):
     # 获取输入的参数对比命令要求后参数的结果
@@ -264,7 +268,7 @@ class CnMsgProcess:
     def cmcc_process(self, _response):
         # _response 格式为 ['operate_ok', _from_username, _order_name, order_param] 或 none 或 文字
 
-        if _response is None :
+        if _response is None:
             return None
         elif _response[0] == 'error':
             return 'error', _response[1]
@@ -289,8 +293,6 @@ class CnMsgProcess:
                 return 'hurry','有新的指令，但iot系统仍没登陆'
             if iot_system.test_alive(_r, _proxies, _auth) != 'alive':
                 # 4a login
-                send_sms1 = '41608446240A6782F2A0F031426EDC066CF24674F3F0586A4D5FF056D75FF4AB'
-                send_sms2 = '41608446240A6782F2A0F031426EDC066CF24674F3F0586AF1E3983438A09296B93FF648FA4937967A053D1D504E42BA6069ED5C9B03B580'
                 loginForm = cn_system.login_4a_1(_r, send_sms1, send_sms2, _proxies, _auth)
                 # 返回值是tuple
                 self.config_list['iot_loginning'] = 1
@@ -304,27 +306,41 @@ class CnMsgProcess:
                 try:
                     iot_system.iot_phone_query_base(_r, _order_param.get(1), _proxies, _auth)
                     _result = iot_system.iot_puk(_r, _proxies, _auth)
-                    # iot_status(_r, phone_num, _proxies, _auth)
                 except:
                     return 'error', _order_param.get(1) + '的puk查询失败，没有查询结果，请检查输入的号码'
                 else:
-                    del self.order_list[_from_username][_order_name]
                     return 'success', _order_param.get(1) + 'puk为：' + _result
+                finally:
+                    del self.order_list[_from_username][_order_name]
+
             elif _actual_order == '#iot_status':
+                # _result = iot_system.iot_status(_r, _order_param.get(1), _proxies, _auth)
+                # del self.order_list[_from_username][_order_name]
                 try:
                     _result = iot_system.iot_status(_r, _order_param.get(1), _proxies, _auth)
-                    # iot_status(_r, phone_num, _proxies, _auth)
                 except:
                     return 'error', _order_param.get(1) + '的状态查询失败，没有查询结果，请检查输入的号码'
                 else:
-                    del self.order_list[_from_username][_order_name]
                     return 'success', _order_param.get(1) + '状态为：' + _result
+                finally:
+                    del self.order_list[_from_username][_order_name]
+
+            elif _actual_order == '#iot_outstanding_fees':
+                try:
+                    _result_step_1 = iot_system.iot_outstanding_fees_1(_r, _order_param.get(1), _proxies, _auth)
+                    _result = iot_system.iot_outstanding_fees_1(_r, _result_step_1, _order_param.get(1), _proxies, _auth)
+                except:
+                    return 'error', _order_param.get(1) + '的余额查询失败，没有查询结果，请检查输入的号码'
+                else:
+                    return 'success', _order_param.get(1) + '余额为：/n' + _result
+                finally:
+                    del self.order_list[_from_username][_order_name]
+
         elif _cmcc_system_name == 'ESOP':
             pass
 
         elif _cmcc_system_name == '4a':
             if _actual_order == '#4a_sms':
-                cn_pwd_saw = 'qWer1@34'
                 _result = cn_system.login_4a_2(_r, cn_pwd_saw, _order_param.get(1), _order_param.get(2), _proxies,
                                                _auth)
                 # login_4a_2(r, cn_pwd_saw, sms_pwd, loginForm2, _proxies, _auth)
@@ -344,13 +360,12 @@ class CnMsgProcess:
                 del self.order_list[_from_username][_order_name]
                 return 'iot_login_up', 1
             elif _actual_order == '#4a_login_clone':
-                send_sms1 = '41608446240A6782F2A0F031426EDC066CF24674F3F0586A4D5FF056D75FF4AB'
-                send_sms2 = '41608446240A6782F2A0F031426EDC066CF24674F3F0586AF1E3983438A09296B93FF648FA4937967A053D1D504E42BA6069ED5C9B03B580'
                 loginForm = cn_system.login_4a_1(_r, send_sms1, send_sms2, _proxies, _auth)
                 # 返回值是tuple
                 del self.order_list[_from_username][_order_name]
                 return '4a_login_up', loginForm
 
+    # 将对话的结果转到命令字典
     def chat_to_order(self, _response,):
         # _response 格式为 ['operate_ok', _from_username, _order_name, order_param]
 
@@ -366,6 +381,7 @@ class CnMsgProcess:
         if self.chat_list[_from_username].get(_order_name) is not None:
             del self.chat_list[_from_username][_order_name]
 
+    # 处理待办的命令
     def deal_todo_order(self,_system, _from_username):
         # order_list 格式为 {fromusername:{ordername:{1:数值,2:数值……}}}
 

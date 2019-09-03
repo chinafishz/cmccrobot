@@ -1,0 +1,13 @@
+
+ 'FromUserName' (140524504200432) = {str} '@@c51f7a66732413c2d4adb60289d3e2d63f13752a6248ccb42905ecf14048da09'
+ 'ToUserName' (140524504201008) = {str} '@374c5730f0493d460a1d73d28cdbe59a4d16e61ce5fdf968bc2c53253fbed88d'
+ 'CreateTime' (140524504200688) = {int} 1566031511
+ 
+
+ 'ActualNickName' (140524524188592) = {str} '自己2'
+ 'IsAt' (140524524184608) = {bool} False
+ 'ActualUserName' (140524524188528) = {str} '@a37a7e6c965e0fa950f6755992b2d14fdcffa823dad65a14c1d83c6f425efdfe'
+ 'User' (140524561468472) = {Chatroom} {'MemberList': <ContactList: [<ChatroomMember: {'MemberList': <ContactList: []>, 'Uin': 0, 'UserName': '@374c5730f0493d460a1d73d28cdbe59a4d16e61ce5fdf968bc2c53253fbed88d', 'NickName': '施成珀 (仲夏 👍)', 'AttrStatus': 33792359, 'PYInitial': '', 'PYQuanPin': '',
+ 'Type' (140524524608456) = {str} 'Text'
+ 'Text' (140524561468248) = {str} '#puK  1234567890112'
+

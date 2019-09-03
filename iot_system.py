@@ -7,30 +7,92 @@ from bs4 import BeautifulSoup
 from requests.auth import HTTPProxyAuth
 import cn_system
 
+header = {
+    'User-Agent': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.1; Trident/7.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; .NET4.0C; .NET4.0E)',
+    'Accept': '*/*', 'Accept-Language': 'zh-CN', 'Accept-Encoding': 'gzip, deflate'}
+header2 = {
+    'User-Agent': 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; WOW64; Trident/6.0; SE 2.X MetaSr 1.0)',
+    'Accept': '*/*', 'Accept-Language': 'zh-cn', 'Accept-Encoding': 'gzip, deflate',
+    'X-Requested-With': 'XMLHttpRequest'}
+
 
 def test_alive(_r, _proxies, _auth):
-    # url = ''
-    # s = self.r.get(url, auth=self.auth, proxies=self.proxies)
     try:
-        iot_status(_r, '17228107947', _proxies, _auth)
+        iot_outstanding_fees_1(_r, '17228107947', _proxies, _auth)
         return 'alive'
     except:
         return 'not alive'
 
 
-def iot_status(_r, phone_num, _proxies, _auth):
-    header = {'User-Agent': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.1; Trident/7.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; .NET4.0C; .NET4.0E)',
-              'Accept': '*/*', 'Accept-Language': 'zh-CN', 'Accept-Encoding': 'gzip, deflate'}
-
+def iot_outstanding_fees_1(_r, phone_num, _proxies, _auth):
     _random = '0.'+str(random.randint(100000000000000,999999999999999))+str(random.randint(1,9))
     url = 'http://10.253.61.8/ngcustcare/chargesrv/common/qryRelateSubs.action?servNumber=' + phone_num + '&isSupportGrp=undefined&random='+_random
     s = _r.get(url, headers=header, auth=_auth, proxies=_proxies)
     soup = BeautifulSoup(s.text, 'lxml')
-    _result = ''.join(soup.select('#columnDiv1')[0].find(attrs={"name":"subscriber_tr"}).select('td')[3].text).split()[0]
+    s = soup.select('.table_list02 tr[name = "subscriber_tr"] input[name="status"]')
+    _len = s.__len__()
+    _range = range(_len)
+    for _i in _range:
+        if s[_i].attrs['value'] != 'US99':
+            return soup.select('.table_list02 tr[name = "subscriber_tr"] input[name="subsId"]')[_i].attrs['value']
+        else:
+            result = soup.select('.table_list02 tr[name = "subscriber_tr"] input[name="subsId"]')[_i].attrs['value']
+    return result
+    # 返回欠费查询的subsid
+
+
+def iot_outstanding_fees_2(_r, _sub_sid, phone_num, _proxies, _auth):
+    url = 'http://10.253.61.8/ngcustcare/chargesrv/accountInfoQry/balanceQry/query.action'
+    param = {'subsId': _sub_sid, 'searchType': 'servNumber', 'searchNumber': phone_num, 'balanceType': 'CanUse'}
+    s = _r.post(url, data=param, auth=_auth, proxies=_proxies)
+    soup = BeautifulSoup(s.text, 'lxml')
+    _list = soup.select('.table_list03')[1].select('td')
+    _result = ''
+    for _i in _list:
+        _result = _result + '/n'+''.join(_i.text).split()
     return _result
 
 
+def iot_status(_r, phone_num, _proxies, _auth):
+    header1 = {
+        'User-Agent': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.1; Trident/7.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; .NET4.0C; .NET4.0E)',
+        'Accept': '*/*', 'Accept-Language': 'zh-CN', 'Accept-Encoding': 'gzip, deflate',
+        'x-requested-with': 'XMLHttpRequest', 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+        'Content-Length': '20'}
+    _result_step1 = iot_phone_query_base_setp1(_r, phone_num, _proxies, _auth)
+    _result_step2 = iot_phone_query_base_setp2(_r, _result_step1, phone_num, _proxies, _auth)
+    url = 'http://10.253.61.8/nguniteview/layoutAction.do?method=showView&ownerType=1&viewId=200'
+    _param = {'width': '1098', 'height': '14'}
+    s = _r.post(url, data=_param, headers=header1, auth=_auth, proxies=_proxies)
+    soup = BeautifulSoup(s.text, 'lxml')
+    _result_status = soup.select('.fv_tb_tr')[0].select('td')[3].text
+    if _result_status != '停机':
+        return _result_status
+    else:
+        _result_stopKeyValue = BeautifulSoup(_result_step1.text, 'lxml').select('input[name="stopKeyValue"]')[0].attrs['value']
+        return _result_stopKeyValue
+
+
+def cn_cookies2(r,cookies, phone_num):
+    cookies = dict()
+    for i in r.cookies.get_dict('10.253.61.8'):
+        cookies[i] = r.cookies.get(i, '', '10.253.61.8')
+        cookies['bsacKF'] = 'NGCRM_BOSS'
+        cookies['com.huawei.boss.CONTACTID'] = 'undefined'
+        cookies['com.huawei.boss.CURRENT_MENUID'] = '100110121062'
+        cookies['com.huawei.boss.CURRENT_TAB'] = 'BOSS%5E' + phone_num + '%5E100110121062%7E' + phone_num
+        cookies['com.huawei.boss.CURRENT_USER'] = phone_num
+        cookies['MACAddr'] = 'null'
+        cookies['sDNSName'] = '3B8MB8'
+        return cookies
+
+
 def iot_phone_query_base(r, phone_num, _proxies, _auth):
+    _s2= iot_phone_query_base_setp1(r, phone_num, _proxies, _auth)
+    return iot_phone_query_base_setp2(r, _s2, phone_num, _proxies, _auth)
+
+
+def iot_phone_query_base_setp1(r, phone_num, _proxies, _auth):
     def cn_cookies(cookies_temp):
         cookies = dict()
         for i in r.cookies.get_dict('10.253.61.8'):
@@ -42,44 +104,27 @@ def iot_phone_query_base(r, phone_num, _proxies, _auth):
         cookies['com.huawei.boss.CURRENT_USER'] = 'com.huawei.boss.NO_CURRENT_USER'
         return cookies
 
-    def cn_cookies2(cookies, phone_num):
-        cookies = dict()
-        for i in r.cookies.get_dict('10.253.61.8'):
-            cookies[i] = r.cookies.get(i, '', '10.253.61.8')
-        cookies['bsacKF'] = 'NGCRM_BOSS'
-        cookies['com.huawei.boss.CONTACTID'] = 'undefined'
-        cookies['com.huawei.boss.CURRENT_MENUID'] = '100110121062'
-        cookies['com.huawei.boss.CURRENT_TAB'] = 'BOSS%5E' + phone_num + '%5E100110121062%7E' + phone_num
-        cookies['com.huawei.boss.CURRENT_USER'] = phone_num
-        cookies['MACAddr'] = 'null'
-        cookies['sDNSName'] = '3B8MB8'
-        return cookies
-
-    def cn_soup(temp):
-        a = soup.find(attrs={"name": temp}).attrs['value']
-        return a
-
-    header2 = {
-        'User-Agent': 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; WOW64; Trident/6.0; SE 2.X MetaSr 1.0)',
-        'Accept': '*/*', 'Accept-Language': 'zh-cn', 'Accept-Encoding': 'gzip, deflate',
-        'X-Requested-With': 'XMLHttpRequest'}
-
     cookies1 = cn_cookies(r.cookies)
     url = 'http://10.253.61.8/ngcustcare/custlogin/qryCustInfo.action'
-    parma = {'method': 'qryCustInfo', 'servNumber': phone_num, 'authCheckMode': 'AuthCheckZ', 'verifyCode': '',
+    param = {'method': 'qryCustInfo', 'servNumber': phone_num, 'authCheckMode': 'AuthCheckZ', 'verifyCode': '',
              'pswd': '', 'certType': 'IdCard', 'certID': '', 'rndPswd': '', 'custType': 'PersonCustomer',
              'domainType': 'null', 'isCert2G': '', 'ONLYLOGIN': 'onlyLogin', 'withoutPassValidate': 'true',
              'isUseReadIdCardWithTwo': '0'}
-    s = r.post(url, cookies=cookies1, data=parma, headers=header2, auth=_auth, proxies=_proxies)
-
-    cn_cookies = cn_cookies2(r.cookies, phone_num)
+    s = r.post(url, cookies=cookies1, data=param, headers=header2, auth=_auth, proxies=_proxies)
+    cn_cookies = cn_cookies2(r, r.cookies, phone_num)
     url2 = 'http://10.253.61.8/ngcustcare/uniteview/uviewtwo/uvDisper.action?currentTabID=BOSS^' + phone_num + '^100110121062~' + phone_num
     s2 = r.get(url2, cookies=cn_cookies, headers=header2, auth=_auth, proxies=_proxies)
-    soup = BeautifulSoup(s2.text, 'lxml')
+    return s2
 
-    cn_cookies3 = cn_cookies2(r.cookies, phone_num)
+
+def iot_phone_query_base_setp2(r, s2, phone_num, _proxies, _auth):
+    def cn_soup(temp):
+        a = soup.find(attrs={"name": temp}).attrs['value']
+        return a
+    soup = BeautifulSoup(s2.text, 'lxml')
+    cn_cookies3 = cn_cookies2(r, r.cookies, phone_num)
     url3 = 'http://10.253.61.8/nguniteview/bossviewhome.jsp'
-    parma3 = {'ccm_ObjectID': '', 'ccm_RandomNum': '', 'ccdirect': soup.find(attrs={"name": "ccdirect"}).attrs['value'],
+    param3 = {'ccm_ObjectID': '', 'ccm_RandomNum': '', 'ccdirect': soup.find(attrs={"name": "ccdirect"}).attrs['value'],
               'ccm_EntityID': soup.find(attrs={"name": "ccm_EntityID"}).attrs['value'],
               'ccm_EntityName': soup.find(attrs={"name": "ccm_EntityName"}).attrs['value'],
               'ccm_CreateDate': soup.find(attrs={"name": "ccm_CreateDate"}).attrs['value'],
@@ -159,8 +204,8 @@ def iot_phone_query_base(r, phone_num, _proxies, _auth):
               'com_QueueID': '', 'com_InvVersion': '', 'com_areaID': '', 'servNumber': cn_soup('servNumber'),
               'transmit': cn_soup('transmit'), 'recType': '', 'stopKeyValue': cn_soup('stopKeyValue'),
               'remotemac': '08-00-27-44-EC-99'}
-    s = r.post(url3, data=parma3, cookies=cn_cookies3, headers=header2, auth=_auth, proxies=_proxies)
-    return s.text
+    s = r.post(url3, data=param3, cookies=cn_cookies3, headers=header2, auth=_auth, proxies=_proxies)
+    return s
 
 
 def iot_puk(r,  _proxies, _auth):

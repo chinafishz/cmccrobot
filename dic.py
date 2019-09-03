@@ -85,6 +85,30 @@ order_dic = {
                 'property': {'type': int, 'length': [13,11], 'first_num': '1'}
             }
 
+        },
+    '#查余额':
+        {
+            'id': 1003,
+            'param_count': 1,
+            'system': 'iot',
+            'actual_order': '#iot_outstanding_fees',
+            1: {
+                'name': '物联网号码',
+                'property': {'type': int, 'length': [13,11], 'first_num': '1'}
+            }
+
+        },
+    '#查欠费':
+        {
+            'id': 1003,
+            'param_count': 1,
+            'system': 'iot',
+            'actual_order': '#iot_outstanding_fees',
+            1: {
+                'name': '物联网号码',
+                'property': {'type': int, 'length': [13,11], 'first_num': '1'}
+            }
+
         }
     }
 

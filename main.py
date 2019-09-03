@@ -8,7 +8,7 @@ import process
 
 
 def main(self):
-    @itchat.msg_register(TEXT, isFriendChat=True, isGroupChat=False)
+    @itchat.msg_register(TEXT, isFriendChat=True, isGroupChat=True)
     def simple_reply(msg):
         _from_username = msg.FromUserName
         _to_username = msg.ToUserName
