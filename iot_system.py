@@ -49,7 +49,9 @@ def iot_outstanding_fees_2(_r, _sub_sid, phone_num, _proxies, _auth):
     _list = soup.select('.table_list03')[1].select('td')
     _result = ''
     for _i in _list:
-        _result = _result + '/n'+''.join(_i.text).split()
+        _a = ''.join(_i.text).split()
+        if len(_a) > 0:
+            _result = _result + '\n'+_a[0]
     return _result
 
 
@@ -87,11 +89,13 @@ def cn_cookies2(r,cookies, phone_num):
         return cookies
 
 
+# 号码综合查询_setp2
 def iot_phone_query_base(r, phone_num, _proxies, _auth):
     _s2= iot_phone_query_base_setp1(r, phone_num, _proxies, _auth)
     return iot_phone_query_base_setp2(r, _s2, phone_num, _proxies, _auth)
 
 
+# 号码综合查询_setp1
 def iot_phone_query_base_setp1(r, phone_num, _proxies, _auth):
     def cn_cookies(cookies_temp):
         cookies = dict()
@@ -117,6 +121,7 @@ def iot_phone_query_base_setp1(r, phone_num, _proxies, _auth):
     return s2
 
 
+# 号码综合查询_setp2
 def iot_phone_query_base_setp2(r, s2, phone_num, _proxies, _auth):
     def cn_soup(temp):
         a = soup.find(attrs={"name": temp}).attrs['value']
@@ -215,6 +220,9 @@ def iot_puk(r,  _proxies, _auth):
     soup = BeautifulSoup(s.text, 'lxml')
     _result = soup.select('td')[3].text
     return _result
+
+
+
 
 
 

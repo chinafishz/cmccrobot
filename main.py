@@ -69,13 +69,7 @@ def main(self):
         #             _at = '@' + msg['ActualNickName'] + '\n'
         #         else:
         #             _at = '@' + _is_friend.NickName + '\n'
-        #     _temp_status = 0
-        #     for _i in _response.split('@|@'):
-        #         if _temp_status == 0:
-        #             _temp_status = 1
-        #             itchat.send(_at + _i, toUserName=_from_username)
-        #         else:
-        #             itchat.send(_i, toUserName=_from_username)
+        #
 
         # a.setdefault('chinafishz',{'ordername':'#puk','param':{}}).setdefault('param',{'c':3,'b':2}).update({'c':3,'b':2})
         # if(msg.FromUserName!='@146bc331344a6eedc213bed5b29fa465e26a6673b52b566f74e45fb2adf6dd9d'):

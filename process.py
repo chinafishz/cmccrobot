@@ -257,7 +257,7 @@ class CnMsgProcess:
             # 返回结果给cmcc操作
 
         else:
-            _result = '错误（缺参数），命令格式为：@|@ %s ' % _order_name
+            _result = '错误（缺参数），命令格式为： %s ' % _order_name
             for _i in range(order_dic.get(_order_name)['param_count']):
                 if self.chat_list.get(_from_username).get(_order_name).get(_i + 1) is None:
                     _result = _result + ' ' + order_dic.get(_order_name).get(_i + 1).get('name')
@@ -328,11 +328,11 @@ class CnMsgProcess:
             elif _actual_order == '#iot_outstanding_fees':
                 try:
                     _result_step_1 = iot_system.iot_outstanding_fees_1(_r, _order_param.get(1), _proxies, _auth)
-                    _result = iot_system.iot_outstanding_fees_1(_r, _result_step_1, _order_param.get(1), _proxies, _auth)
+                    _result = iot_system.iot_outstanding_fees_2(_r, _result_step_1, _order_param.get(1), _proxies, _auth)
                 except:
                     return 'error', _order_param.get(1) + '的余额查询失败，没有查询结果，请检查输入的号码'
                 else:
-                    return 'success', _order_param.get(1) + '余额为：/n' + _result
+                    return 'success', _order_param.get(1) + '的余额为：' + _result
                 finally:
                     del self.order_list[_from_username][_order_name]
 

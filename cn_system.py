@@ -19,10 +19,10 @@ def proxy_load():
     proxies = ''
     if ip[0:7] == '10.244.':
         # 在公司
-        # proxies = {'http': 'http://chinafishz:qwer1234@10.244.121.23:808','https': 'https://chinafishz:qwer1234@10.244.121.23:808'}
-        # auth = HTTPProxyAuth('chinafishz', 'qwer1234')
-        proxies = {}
-        auth = None
+        proxies = {'http': 'http://chinafishz:qwer1234@10.244.121.151:808','https': 'https://chinafishz:qwer1234@10.244.121.151:808'}
+        auth = HTTPProxyAuth('chinafishz', 'qwer1234')
+        #proxies = {}
+        #auth = None
     else:
         proxies = {'http': 'http://chinafishz:qwer1234@79d61a65dc3eb552.natapp.cc:29980',
                         'https': 'https://chinafishz:qwer1234@79d61a65dc3eb552.natapp.cc:29980'}
