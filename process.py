@@ -2,6 +2,8 @@ import cn_system
 from dic import order_dic
 import iot_system
 from bs4 import BeautifulSoup
+import importlib as imp
+
 
 send_sms1 = '41608446240A6782F2A0F031426EDC066CF24674F3F0586A4D5FF056D75FF4AB'
 send_sms2 = '41608446240A6782F2A0F031426EDC066CF24674F3F0586AF1E3983438A092961588230AE57DFFA4938B6BEDBBA3956A6069ED5C9B03B580'
@@ -396,3 +398,12 @@ class CnMsgProcess:
                     return ['operate_ok', _from_username[0], _order_name[0], _order_name[1]]
 
         return None
+
+
+def import_reload(a):
+    if a == "iot_system":
+        imp.reload(iot_system)
+    elif a == 'cn_system':
+        imp.reload(cn_system)
+
+

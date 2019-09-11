@@ -5,7 +5,7 @@ from process import CnMsgProcess
 import platform
 import requests
 import process
-
+import importlib as imp
 
 def main(self):
     @itchat.msg_register(TEXT, isFriendChat=True, isGroupChat=True)
@@ -104,7 +104,17 @@ class MyThread(threading.Thread):
             if len(b) == 2:
                 itchat.send(b[1], b[0])
             elif len(b) == 1:
-                itchat.send(a)
+                if b == 'iot':
+                    process.import_reload('iot_system')
+                    print('iot_system reload is done')
+                elif b == 'process':
+                    imp.reload(process)
+                    print('process reload is done')
+                elif b == 'system':
+                    process.import_reload('cn_system')
+                    print('cn_system reload is done')
+                else:
+                    itchat.send(a)
             # 这里要继续补充
 
 
