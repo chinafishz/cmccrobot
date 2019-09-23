@@ -6,7 +6,9 @@ import random
 import json
 import _thread
 from requests.auth import HTTPProxyAuth
-
+import iot_system
+import importlib as imp
+import threading
 
 def proxy_load():
     try:
@@ -19,7 +21,7 @@ def proxy_load():
     proxies = ''
     if ip[0:7] == '10.244.':
         # 在公司
-        proxies = {'http': 'http://chinafishz:qwer1234@10.244.121.151:808','https': 'https://chinafishz:qwer1234@10.244.121.151:808'}
+        proxies = {'http': 'http://chinafishz:qwer1234@10.244.121.98:808','https': 'https://chinafishz:qwer1234@10.244.121.98:808'}
         auth = HTTPProxyAuth('chinafishz', 'qwer1234')
         #proxies = {}
         #auth = None
@@ -126,7 +128,59 @@ def iot_login(r, _system_name_list, _proxies, _auth):
     return 'success', 'iot'
 
 
+# =======================测试用==========================
+def main_test():
+    send_sms1 = '41608446240A6782F2A0F031426EDC066CF24674F3F0586A4D5FF056D75FF4AB'
+    send_sms2 = '41608446240A6782F2A0F031426EDC066CF24674F3F0586AF1E3983438A092961588230AE57DFFA4938B6BEDBBA3956A6069ED5C9B03B580'
+    cn_pwd_saw = 'Qwer!234'
+
+    # _proxies = {'http': 'http://chinafishz:qwer1234@79d61a65dc3eb552.natapp.cc:29980',
+    #             'https': 'https://chinafishz:qwer1234@79d61a65dc3eb552.natapp.cc:29980'}
+    # _auth = HTTPProxyAuth('chinafishz', 'qwer1234')
+    _proxies = {}
+    _auth = None
+
+    _r = requests.session()
+
+    loginForm = login_4a_1(_r, send_sms1, send_sms2, _proxies, _auth)
+    cn_sms_pwd = input()
+    result = login_4a_2(_r, cn_pwd_saw, cn_sms_pwd, loginForm, _proxies, _auth)
+    print(result)
+
+    cn_iot = input()
+    iot_login(_r, cn_iot, _proxies, _auth)
+    iot_system.iot_status(_r, '1440058246465', _proxies, _auth)
+    thread = main_test_thread(1, 'thread-1', 1, _r, _proxies, _auth)
+    thread.start()
 
 
+class main_test_thread(threading.Thread):
+    def __init__(self, thread_id, name, counter, _r, _proxies, _auth):
+        threading.Thread.__init__(self)
+        self.threadID = thread_id
+        self.name = name
+        self.counter = counter
+        self._r = _r
+        self._proxies = _proxies
+        self._auth = _auth
 
+    def run(self):
+        try:
+            while True:
+                a = input()
+                if a == 'laina':
+                    a = iot_system.iot_laina500(self._r,'1064891599533', self._proxies, self._auth)
+                    print(a)
+                elif a == 'iot':
+                    imp.reload(iot_system)
+                elif a == 'puk':
+                    iot_system.iot_phone_query_base(self._r, '17228124669',self._proxies,self. _auth)
+                    _result = iot_system.iot_puk(self._r, self._proxies, self._auth)
+                    print(_result)
+        except:
+            pass
 
+if __name__ == "__main__":
+    main_test()
+
+# =======================以上为测试用==========================

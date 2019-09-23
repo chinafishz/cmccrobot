@@ -160,16 +160,15 @@ def process_a08(_input_property, _order_require):
     return match_result
 
 
+
 class CnMsgProcess:
     def __init__(self, cn_order_list, cn_chat_list, cn_config_list, r):
         self.order_list = cn_order_list
         self.chat_list = cn_chat_list
-        # order_list = {}
-        # chat_list = {}
-
         self.config_list = cn_config_list
         self.r = r
         self.proxy_load = cn_system.proxy_load()
+
 
     def cn_msg_process(self, msg):
         _from_username = msg.FromUserName
@@ -337,7 +336,13 @@ class CnMsgProcess:
                     return 'success', _order_param.get(1) + '的余额为：' + _result
                 finally:
                     del self.order_list[_from_username][_order_name]
-
+            elif _actual_order == '#laina500':
+                _result = iot_system.iot_laina500(_r, _order_param.get(1), _proxies, _auth)
+                del self.order_list[_from_username][_order_name]
+                if _result == '办理完成':
+                    return 'success', _order_param.get(1) + '已经开机,但暂采用人工加流量池方式，稍后加入再回复,请谅解'
+                else:
+                    return 'error',_result
         elif _cmcc_system_name == 'ESOP':
             pass
 
@@ -399,6 +404,17 @@ class CnMsgProcess:
 
         return None
 
+
+class CnMsgProcess_kivy(CnMsgProcess):
+    def __init__(self, cn_order_list, cn_chat_list, cn_config_list, r, _kivy, cn_weixin_chat):
+        self.order_list = cn_order_list
+        self.chat_list = cn_chat_list
+        self.config_list = cn_config_list
+        self.r = r
+        self.proxy_load = cn_system.proxy_load()
+        self.kivy = _kivy
+        self.kivy_text_all = ''
+        self.weixin_chat = cn_weixin_chat
 
 def import_reload(a):
     if a == "iot_system":

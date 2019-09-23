@@ -6,6 +6,8 @@ import random
 from bs4 import BeautifulSoup
 from requests.auth import HTTPProxyAuth
 import cn_system
+import importlib as imp
+import os
 
 header = {
     'User-Agent': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.1; Trident/7.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; .NET4.0C; .NET4.0E)',
@@ -75,7 +77,7 @@ def iot_status(_r, phone_num, _proxies, _auth):
         return _result_stopKeyValue
 
 
-def cn_cookies2(r,cookies, phone_num):
+def cn_cookies1(r,cookies, phone_num):
     cookies = dict()
     for i in r.cookies.get_dict('10.253.61.8'):
         cookies[i] = r.cookies.get(i, '', '10.253.61.8')
@@ -87,12 +89,6 @@ def cn_cookies2(r,cookies, phone_num):
         cookies['MACAddr'] = 'null'
         cookies['sDNSName'] = '3B8MB8'
         return cookies
-
-
-# 号码综合查询_setp2
-def iot_phone_query_base(r, phone_num, _proxies, _auth):
-    _s2= iot_phone_query_base_setp1(r, phone_num, _proxies, _auth)
-    return iot_phone_query_base_setp2(r, _s2, phone_num, _proxies, _auth)
 
 
 # 号码综合查询_setp1
@@ -115,7 +111,7 @@ def iot_phone_query_base_setp1(r, phone_num, _proxies, _auth):
              'domainType': 'null', 'isCert2G': '', 'ONLYLOGIN': 'onlyLogin', 'withoutPassValidate': 'true',
              'isUseReadIdCardWithTwo': '0'}
     s = r.post(url, cookies=cookies1, data=param, headers=header2, auth=_auth, proxies=_proxies)
-    cn_cookies = cn_cookies2(r, r.cookies, phone_num)
+    cn_cookies = cn_cookies1(r, r.cookies, phone_num)
     url2 = 'http://10.253.61.8/ngcustcare/uniteview/uviewtwo/uvDisper.action?currentTabID=BOSS^' + phone_num + '^100110121062~' + phone_num
     s2 = r.get(url2, cookies=cn_cookies, headers=header2, auth=_auth, proxies=_proxies)
     return s2
@@ -127,7 +123,7 @@ def iot_phone_query_base_setp2(r, s2, phone_num, _proxies, _auth):
         a = soup.find(attrs={"name": temp}).attrs['value']
         return a
     soup = BeautifulSoup(s2.text, 'lxml')
-    cn_cookies3 = cn_cookies2(r, r.cookies, phone_num)
+    cn_cookies3 = cn_cookies1(r, r.cookies, phone_num)
     url3 = 'http://10.253.61.8/nguniteview/bossviewhome.jsp'
     param3 = {'ccm_ObjectID': '', 'ccm_RandomNum': '', 'ccdirect': soup.find(attrs={"name": "ccdirect"}).attrs['value'],
               'ccm_EntityID': soup.find(attrs={"name": "ccm_EntityID"}).attrs['value'],
@@ -212,6 +208,9 @@ def iot_phone_query_base_setp2(r, s2, phone_num, _proxies, _auth):
     s = r.post(url3, data=param3, cookies=cn_cookies3, headers=header2, auth=_auth, proxies=_proxies)
     return s
 
+def iot_phone_query_base(_r, phone_num, _proxies, _auth):
+    s2 = iot_phone_query_base_setp1(_r, phone_num, _proxies, _auth)
+    iot_phone_query_base_setp2(_r, s2, phone_num, _proxies, _auth)
 
 def iot_puk(r,  _proxies, _auth):
     url = 'http://10.253.61.8/nguniteview/layoutAction.do?method=showView&ownerType=1&viewId=314'
@@ -221,6 +220,116 @@ def iot_puk(r,  _proxies, _auth):
     _result = soup.select('td')[3].text
     return _result
 
+
+# 判断输入值是否在指定的文件里面，第一次为徕纳500而设置
+def process_matching_infile(_input, _file):
+    _content = ''
+
+    # _file格式："client/laina500.txt"
+    with open(_file, "r") as file:
+        for line in file:
+            _line = ''.join(line).split()[0]
+            if _line == _input:
+                _content = _line
+                break
+    if _content == '':
+        return False
+    else:
+        return True
+
+
+def cn_cookies2(_cookies, cn_phoneNum):
+    cookies = dict()
+    for i in _cookies.get_dict('10.253.61.8'):
+        cookies[i] = _cookies.get(i, '', '10.253.61.8')
+    cookies['bsacKF'] = 'NGCRM_BOSS'
+    cookies['com.huawei.boss.CONTACTID'] = 'undefined'
+    cookies['com.huawei.boss.CURRENT_MENUID'] = 'ServiceOnStopOrStart'
+    cookies['com.huawei.boss.CURRENT_TAB'] = 'BOSS%5E' + cn_phoneNum + '%5EServiceOnStopOrStart%7E' + cn_phoneNum
+    cookies['com.huawei.boss.CURRENT_USER'] = cn_phoneNum
+    cookies['MACAddr'] = 'null'
+    cookies['sDNSName'] = '3B8MB8'
+    return cookies
+
+
+def __result_stop_and_open(_r, phone, _type, _proxies, _auth):
+    iot_phone_query_base_setp1(_r, phone, _proxies, _auth)
+
+    url = 'http://10.253.61.8/ngcustcare/common/submits/unitCommonSubmit.action?flow=productOrientedFlow&version=1.01'
+    s = _r.get(url, auth=_auth, proxies=_proxies)
+    soup = BeautifulSoup(s.text, 'lxml')
+    _submits = soup.find(attrs={'name': 'submits/unitCommonSubmit'}).attrs['value']
+
+    url = 'http://10.253.61.8/ngcustcare/custsvc/stopopen/stopOpenCommit.action'
+    param = ''
+    if _type == '申请开机':
+        param = {'stopOpenType': '00030000', 'stopOpenReason': 'd', 'stopOpenMemo': '',
+                 'hiddenTokenName': 'submits/unitComamonSubmit', 'submits/unitCommonSubmit': _submits}
+    cn_cookies3 = cn_cookies2(_r.cookies, phone)
+    s = _r.post(url, data=param, auth=_auth, proxies=_proxies, cookies=cn_cookies3)
+    soup = BeautifulSoup(s.text, 'lxml')
+    _hiddenTokenName_value = soup.find(attrs={"name": "fee/calculate"}).attrs['value']
+
+    url = 'http://10.253.61.8/ngcustcare/common/fee/pay.action'
+    param = {'PreBussOrderId': '', 'withdrawGoods': '', 'payTypeBean.cashAmt': '', 'payTypeBean.chequeAmt': '',
+             'payTypeBean.bankId': '', 'payTypeBean.bankName': '', 'payTypeBean.chequeNum': '',
+             'payTypeBean.cardAmt': '', 'payTypeBean.posNum': '', 'payTypeBean.confirmPosNum': '',
+             'payTypeBean.weiXinPayAmt': '', 'payTypeBean.weiXinPayNum': '', 'payTypeBean.aliPayAmt': '',
+             'payTypeBean.orderId': '', 'payTypeBean.aliPayPayNum': '', 'payTypeBean.newSeparatePayAmt': '',
+             'payTypeBean.orderId': '', 'payTypeBean.newSeparatePayNum': '', 'payTypeBean.preAuthSeparatePayAmt': '',
+             'payTypeBean.orderId': '', 'payTypeBean.preAuthSeparatePayNum': '', 'payTypeBean.acctCash': '',
+             'payTypeBean.acctId': '-1', 'payTypeBean.acctPayCash': '', 'payTypeBean.acctPayId': '-1',
+             'payTypeBean.scoreCash': '', 'payTypeBean.score': '', 'payTypeBean.scoreTransRule': '1/1',
+             'payTypeBean.m': '0', 'payTypeBean.mTransRule': '1/1', 'payTypeBean.bankAmt': '',
+             'payTypeBean.posautocardAmt': '', 'payTypeBean.posautocardNum': '', 'payTypeBean.posautoTerminalno': '',
+             'payTypeBean.posautoReferno': '', 'payTypeBean.posautoMerchantno': '', 'payTypeBean.posnotautoAmt': '',
+             'payTypeBean.posnotautocardNum': '', 'payTypeBean.posnotautoTerminalno': '',
+             'payTypeBean.posnotautoReferno': '', 'payTypeBean.posnotautoMerchantno': '', 'payTypeBean.separateAmt': '',
+             'payTypeBean.separateBankId': 'GH', 'payTypeBean.separateBankName': '%E5%B7%A5%E8%A1%8C',
+             'payTypeBean.separateBankAcct': '', 'payTypeBean.separateBankUserName': '',
+             'payTypeBean.separatePosNum': '', 'payTypeBean.limitCash': '', 'payTypeBean.unlimitCash': '',
+             'BARGAINFEEXML': '',
+             'CHANGEFEEBYBARGAINXML': '@260@263xml@232version@261@2341@2460@234@232encoding@261@234UTF@2458@234@263@262@260huawei@295call@262@260i@262common@247fee@247@242@260@247i@262@260e@262changeFeeByBargain@260@247e@262@260p@262@260m@262@260n@2620@260@247n@262@260t@262a@260@247t@262@260v@262@260@247v@262@260@247m@262@260m@262@260n@2621@260@247n@262@260t@262a@260@247t@262@260v@262@260@247v@262@260@247m@262@260@247p@262@260@247huawei@295call@262&UPDATEPAYTYPEBYPAGEDATAXML=@260@263xml@232version@261@2341@2460@234@232encoding@261@234UTF@2458@234@263@262@260huawei@295call@262@260i@262common@247fee@247@242@260@247i@262@260e@262updatePayTypeByPageData@260@247e@262@260p@262@260m@262@260n@2620@260@247n@262@260t@262a@260@247t@262@260v@262@260@247v@262@260@247m@262@260@247p@262@260@247huawei@295call@262',
+             'reccustinfo_name': '', 'reccustinfo_phone': '', 'reccustinfo_certificateType': 'IdCard',
+             'reccustinfo_certificateNum': '440103198607251838', 'reccustinfo_address': '', 'emergencyContactNo': '',
+             'reccustinfo_note': '', 'invoicePrintMode': '', 'hiddenTokenName': 'fee%2Fcalculate',
+             'fee%2Fcalculate': _hiddenTokenName_value, 'receiptNumber': '00000000', 'assembleInvoice': '0',
+             'invoiceNumber': '00000000', 'elecInvoiceServNumber': phone, 'isForPaging': 'OLD', 'changeEnumRecType': ''}
+    s = _r.post(url, data=param, auth=_auth, proxies=_proxies, cookies=cn_cookies3)
+    return ''.join(s.text).split()[0]
+
+
+# 徕纳500:有500个号码加流量池时因停机无法加入，而需要在复通同时加回
+def iot_laina500(_r, phone, _proxies, _auth):
+    _step_result = '指令：徕纳500\n号码：%s' %phone
+
+    try:
+        _step_result = _step_result + '\n步骤1：是否徕纳500号码'
+
+        # 第一步先查是否在徕纳500.txt里面的号码
+        if process_matching_infile(phone, 'client/laina500.txt') is False:
+            _step_result =  _step_result + '\n非目标号码，请查核'
+            return _step_result
+        _step_result = _step_result + '\n成功\n步骤2:是否申请停机'
+
+        # 第二歩查看号码状态
+        _result_status = ''.join(iot_status(_r, phone, _proxies, _auth)).split()[0]
+        if _result_status != '申请停机':
+            _step_result = _step_result + '号码状态为：%s，需转人工判断' % _result_status
+            return _step_result
+        _step_result = _step_result + '\n成功\n步骤3:操作申请开机'
+
+        # 第三歩申请开机
+        _result = __result_stop_and_open(_r, phone, '申请开机', _proxies, _auth)
+
+    except:
+        _step_result = _step_result + '\n出现错误，未能完成剩余步骤'
+    else:
+        _step_result = '办理完成'
+    finally:
+        return _step_result
+
+    # 第四步变更标识
 
 
 

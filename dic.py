@@ -114,17 +114,17 @@ order_dic = {
     # 4001~4500 分配为特定客户使用
     '#徕纳500':
         {
-            'id':4001,
-            'param_count': 2,
+            'id': 4001,
+            'param_count': 1,
             'system': 'iot',
-            'actual_order': '#徕纳500',
+            'actual_order': '#laina500',
+            # 1: {
+            #     'name': '10或者100流量池',
+            #     'property': {'content': [10,100]}
+            # },
             1: {
-                'name': '10或者100流量池',
-                'property': {'content': [10,100]}
-            },
-            2: {
                 'name': '物联网号码',
-                'property': {'type': int, 'length': 11, 'first_num': '1', 'specific_number': 'client/laina500.txt'}
+                'property': {'type': int, 'length': 11, 'first_num': '1'}
             }
         }
     }

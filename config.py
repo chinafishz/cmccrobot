@@ -1,1 +1,0 @@
-/home/chinafishz/projects/cmccrobot/venv/lib/python3.6/site-packages/itchat/config.py
