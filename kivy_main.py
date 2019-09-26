@@ -16,7 +16,6 @@ from kivy.lang import Builder
 from kivy.properties import StringProperty
 from kivy.properties import NumericProperty
 from kivy.properties import ObjectProperty
-import itchat_main
 import itchat
 
 
@@ -35,7 +34,9 @@ Builder.load_string('''
             
 
 # 主类
-<itchat_kivy>:
+<KivyWindow>:
+    
+    # 左栏
     Widget:
         size: 190,root.height
         pos:5,0
@@ -43,56 +44,74 @@ Builder.load_string('''
             size: 190,30
             pos:5,root.height-35
             TextInput:
-            
-        # 左栏
+                    
         ScrollClass:
             size: 185,root.height-45
             pos:5,0
-
+            
             StackLayout:
-                size_hint_y:None
-                orientation:'bt-lr'
-                id:chat_list
+                size_hint:None,None
+                orientation:'rl-bt'
+                id:member_list
+                height:600
+                pos:0,111
                 
-				# 每个按钮高度为80
-				height:root.chat_list_height
-			
+                # 每个按钮高度为80
+            
+                ToggleButton:
+                    pos:0,0
+                    text:'1'
+                ToggleButton:
+                    pos:0,111
+                    text:'2'
 
-   
                 
+    # 中栏                
     Widget:
         size: root.width-390,root.height
         pos:195,0
         
         # 对话区的标题
-        
         BoxLayout:
             size: root.width-390,30
             pos:195,root.height-35
             Label:
                 text:'名称'
                 
+        # 对话框
+        BackgroundColor:
+            size: root.width-390,root.height-110
+            pos:195,65
+            ScrollClass:
+                id:chat_scroll
+                size: root.width-390,root.height-110
+                pos:195,65
+                scroll_y:0
+                # 每个按钮高度为50
+                
+                
         # 对话区的输入框                
         BoxLayout:
-           
             size: root.width-390,30
             pos:195,30
             TextInput:
-                id:send_to_name
+                id:to_username
+                # 输入收信息的人
+                
                 size_hint_x:0.4
                 text:''
             Button:
                 size_hint_x:0.2
                 text:'发送'
-                on_release:root.itchat_send()
+                on_release:root.chat_send()
             Button:
                 size_hint_x:0.25
                 text:'增加聊天框'
-                on_release:root.itchat_receive_creat()
+                on_release:root.chat_receive_creat()
             Button:
                 size_hint_x:0.25
                 text:'更新聊天框'
-                on_release:root.itchat_receive_update()
+                on_release:root.chat_receive_update()
             Button:
                 size_hint_x:0.25
                 text:'启动itchat'
@@ -103,18 +122,6 @@ Builder.load_string('''
             size: root.width-390,30
             pos:195,0
 
-        # 对话框
-        BackgroundColor:
-            size: root.width-390,root.height-110
-            pos:195,65
-            ScrollClass:
-                id:id_chat_scroll
-                size: root.width-390,root.height-110
-                pos:195,65
-                scroll_y:0
-                # 每个按钮高度为50
-              
-                    
 
 
 ''')
@@ -124,33 +131,43 @@ class ScrollClass(ScrollView):
     pass
 
 
+class KivyWindow(Widget):
+    operate = ObjectProperty(None)
+    record = ObjectProperty(Widget)
+    member_list_height = NumericProperty(260)
 
-class chat_boxlayout(BoxLayout):
+
+class ChatWindow(BoxLayout):
     orientation= 'vertical'
 
 
-class Chat_Main_Obj(Widget):
-
-    pass
-
-
-class chat_label(Label):
+class ChatLabel(Label):
     markup = True
-    halign = 'right'
     valign = 'middle',
 
 
-class itchat_kivy(Widget):
-    chat_label_height = NumericProperty(0)
-    chat_list_height = NumericProperty(80)
+class MemberList_ToggleButton(ToggleButton):
+    pass
 
-    # 初始化所有对话的存储对象chat_main_obj
-    chat_main_obj = Chat_Main_Obj()
 
-    # 初始化my的对话boxlayout
-    temp_boxlayout = chat_boxlayout()
-    temp_boxlayout.id = 'my'
-    chat_main_obj.add_widget(temp_boxlayout)
+class KivyOperate(Widget):
+    chat_window_height = NumericProperty(0)
+
+
+    def init(self,_root):
+        a=MemberList_ToggleButton(text='my')
+        b = MemberList_ToggleButton(text='you')
+        _root.ids.member_list.add_widget(a)
+        _root.ids.member_list.add_widget(b)
+        # 初始化左栏增加my的对话框
+
+        chat_window = ChatWindow(id='my', height=self.chat_window_height)
+        # 创建专用的对话窗口组件
+        # _root.record.add_widget(chat_window)
+        # 增加到记录里面
+        _root.ids.chat_scroll.add_widget(chat_window)
+        # 增加到中栏
+
 
     # 发送健效果
     def itchat_send(self):
@@ -183,10 +200,10 @@ class itchat_kivy(Widget):
 
         _root=self.parent.parent.parent.parent
         a = _root.ids.id_chat_scroll.children[0]
-        b = chat_boxlayout()
+
 
         _root.ids.id_chat_scroll.remove_widget(a)
-        _root.ids.id_chat_scroll.add_widget(b)
+
 
 
     # 接受微信消息_创建场景
@@ -194,15 +211,15 @@ class itchat_kivy(Widget):
         _from_name= 'my'
         _msg='fffff'
 
-        a = chat_boxlayout()
-        a.height = 0
-        a.size_hint_y = None
+        # a = chat_boxlayout()
+        # a.height = 0
+        # a.size_hint_y = None
 
 
         b=ToggleButton(id=_from_name,text=_msg,group='cmcc')
-        a.bind(on_release=itchat_kivy.click_chat_list)
+        # a.bind(on_release=itchat_kivy.click_chat_list)
 
-        self.ids.chat_list.add_widget(a)
+        # self.ids.chat_list.add_widget(a)
         self.chat_list_height = self.chat_list_height + 80
 
     def itchat_receive_update(self, _msg):
@@ -215,8 +232,8 @@ class itchat_kivy(Widget):
 
 
     # 启动itchat
-    def itchat_start(self):
-        itchat_main.kivy_start(self)
+    # def itchat_start(self):
+    #     itchat_main.kivy_start(self)
 
 
 
@@ -226,20 +243,20 @@ class itchat_kivy(Widget):
 
 class SomeApp(App):
     def build(self):
-        cn_main=itchat_kivy()
 
-        # 原KV文件没有包含，通过代码实现
-        a = chat_boxlayout()
-        a.height =0
-        a.size_hint_y = None
-        cn_main.ids.id_chat_scroll.add_widget(a)
+        kivy_window = KivyWindow()
+        # 创建根窗口
 
-        b = ToggleButton(id='my',text='自己',state='down',group='cmcc')
-        cn_main.ids.chat_list.add_widget(b)
+        kivy_window.operate = KivyOperate()
+
+        kivy_window.operate.init(kivy_window)
+        # 初始化根窗口
 
 
 
-        return cn_main
+
+
+        return kivy_window
 
 
 if __name__ == "__main__":
