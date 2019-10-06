@@ -126,6 +126,17 @@ order_dic = {
                 'name': '物联网号码',
                 'property': {'type': int, 'length': 11, 'first_num': '1'}
             }
+        },
+    '#申请开机':
+        {
+            'id': 4002,
+            'param_count': 1,
+            'system': 'iot',
+            'actual_order': '#open&stop_shenqing',
+            1: {
+                'name': '物联网号码',
+                'property': {'type': int, 'length': [11,13], 'first_num': '1'}
+            }
         }
     }
 

@@ -92,7 +92,7 @@ def cn_cookies1(r,cookies, phone_num):
 
 
 # 号码综合查询_setp1
-def iot_phone_query_base_setp1(r, phone_num, _proxies, _auth):
+def iot_phone_query_base_setp1(r, phone_num, _proxies, _auth, _type=None):
     def cn_cookies(cookies_temp):
         cookies = dict()
         for i in r.cookies.get_dict('10.253.61.8'):
@@ -114,7 +114,13 @@ def iot_phone_query_base_setp1(r, phone_num, _proxies, _auth):
     cn_cookies = cn_cookies1(r, r.cookies, phone_num)
     url2 = 'http://10.253.61.8/ngcustcare/uniteview/uviewtwo/uvDisper.action?currentTabID=BOSS^' + phone_num + '^100110121062~' + phone_num
     s2 = r.get(url2, cookies=cn_cookies, headers=header2, auth=_auth, proxies=_proxies)
-    return s2
+
+    if _type == 'name':
+        _soup = BeautifulSoup(s2.text, 'lxml')
+        _name =_soup.select('.panel input[name="ccm_EntityName"]')[0].attrs['value']
+        return s2,_name
+    else:
+        return s2
 
 
 # 号码综合查询_setp2
@@ -252,7 +258,7 @@ def cn_cookies2(_cookies, cn_phoneNum):
     return cookies
 
 
-def __result_stop_and_open(_r, phone, _type, _proxies, _auth):
+def stop_and_open(_r, _type, phone, _proxies, _auth):
     iot_phone_query_base_setp1(_r, phone, _proxies, _auth)
 
     url = 'http://10.253.61.8/ngcustcare/common/submits/unitCommonSubmit.action?flow=productOrientedFlow&version=1.01'
@@ -320,7 +326,7 @@ def iot_laina500(_r, phone, _proxies, _auth):
         _step_result = _step_result + '\n成功\n步骤3:操作申请开机'
 
         # 第三歩申请开机
-        _result = __result_stop_and_open(_r, phone, '申请开机', _proxies, _auth)
+        _result = stop_and_open(_r, phone, '申请开机', _proxies, _auth)
 
     except:
         _step_result = _step_result + '\n出现错误，未能完成剩余步骤'

@@ -9,6 +9,7 @@ send_sms1 = '41608446240A6782F2A0F031426EDC066CF24674F3F0586A4D5FF056D75FF4AB'
 send_sms2 = '41608446240A6782F2A0F031426EDC066CF24674F3F0586AF1E3983438A092961588230AE57DFFA4938B6BEDBBA3956A6069ED5C9B03B580'
 cn_pwd_saw = 'Qwer!234'
 
+
 def process_a05(_split):
     # 获取输入的参数对比命令要求后参数的结果
     # self = _split :list
@@ -83,31 +84,11 @@ def process_a06(_text_split, param_property_kinds):
                 result[_i].update({_property_name: len(_param)})
             elif _property_name == 'first_num':
                 result[_i].update({_property_name: _param[0]})
+
     return result
 
 
 def process_a08(_input_property, _order_require):
-    # input_property：输入参数的属性种类字典，_text_split顺序一致
-    # 格式例子：
-    # {
-    #     0:{'type': int, 'length':13, 'first_num': '1'},
-    #     1:{……}
-    # }
-
-    # order_require：命令的字段（order_dic[order_name]），包含property字典，获取要求的属性种类
-    # 格式例子：
-    # {
-    #    'id': 1001,
-    #    'param_count': 1,
-    #     1: {
-    #         'name': 'phoneNum',
-    #         'property': {'type': int, 'length': [13, 11], 'first_num': '1'},
-    #     },
-    #     2:{
-    #         'name': '……',\
-    #         'property':'……'
-    #     }
-    # }
 
     match_result = {}
     # 代表命令要求的参数是否已经知道了匹配的输入参数，''代表没找到，数字代表找到
@@ -158,7 +139,6 @@ def process_a08(_input_property, _order_require):
                 match_result.update({_i: _j})
                 break
     return match_result
-
 
 
 class CnMsgProcess:
@@ -276,6 +256,8 @@ class CnMsgProcess:
         elif type(_response) is list and _response[0] == 'operate_ok':
             self.chat_to_order(_response)
             _order_name = _response[2]
+
+            # _order_param:命令参数
             _order_param = _response[3]
             _from_username = _response[1]
             _cmcc_system_name = order_dic.get(_order_name).get('system')
@@ -336,6 +318,7 @@ class CnMsgProcess:
                     return 'success', _order_param.get(1) + '的余额为：' + _result
                 finally:
                     del self.order_list[_from_username][_order_name]
+
             elif _actual_order == '#laina500':
                 _result = iot_system.iot_laina500(_r, _order_param.get(1), _proxies, _auth)
                 del self.order_list[_from_username][_order_name]
@@ -343,6 +326,34 @@ class CnMsgProcess:
                     return 'success', _order_param.get(1) + '已经开机,但暂采用人工加流量池方式，稍后加入再回复,请谅解'
                 else:
                     return 'error',_result
+
+            # 申请开机
+            elif _actual_order == '#open&stop_shenqing':
+                try:
+                    _dic = {'': ['深**徕纳智能科技有限公司'], '@146bc331344a6eedc213bed5b29fa465e26a6673b52b566f74e45fb2adf6dd9d':['all']}
+                    # 配置微信群能操作那个公司的号码的权限
+
+                    _dic_param = _dic.get(_from_username)
+                    result =''
+                    if _dic_param is not None:
+                        _result = iot_system.iot_phone_query_base_setp1(_r, _order_param.get(1), _proxies, _auth, 'name')
+                        s2 = _result[0]
+                        _name = _result[1]
+                        if _name in _dic_param or _dic_param == ['all']:
+                            iot_system.iot_phone_query_base_setp2(_r, s2, _order_param.get(1), _proxies, _auth)
+                            result = iot_system.stop_and_open(_r,'申请开机', _order_param.get(1), _proxies, _auth)
+                        else:
+                            return 'error', + _order_param.get(1) + '号码所属公司与本微信群配置不一致'
+                    else:
+                        return 'error', '没配置' + _order_param.get(1) + '号码归属公司的开机权限'
+                except:
+                    return 'error', _order_param.get(1) + '申请开机操作【失败】,请查核原因'
+                else:
+                    return 'success', _order_param.get(1) + '申请开机' + result
+                finally:
+                    del self.order_list[_from_username][_order_name]
+
+        # ===========ESOP系统===========
         elif _cmcc_system_name == 'ESOP':
             pass
 
@@ -415,6 +426,7 @@ class CnMsgProcess_kivy(CnMsgProcess):
         self.kivy = _kivy
         self.kivy_text_all = ''
         self.weixin_chat = cn_weixin_chat
+
 
 def import_reload(a):
     if a == "iot_system":
