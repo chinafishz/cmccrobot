@@ -84,9 +84,6 @@ class MemberList_ToggleButton(ToggleButton):
     size_hint = [1, None]
 
 
-    def aa(self):
-        print('1222')
-
 class ScrollClass(ScrollView):
     pass
 
@@ -116,28 +113,24 @@ class KivyWindow(Widget):
     def __init__(self, **kwargs):
         super(KivyWindow,self).__init__(**kwargs)
 
-    def add_member_list(self,_name):
+    def add_member_list(self, _name, _from_class):
         self.member_item_count = self.member_item_count + 1
-        _togglebutton = MemberList_ToggleButton(_id=_name, text=_name, height=self.member_item_height, group='cmcc')
-        _togglebutton.on_release()
+        _togglebutton = MemberList_ToggleButton(_id=_name, _class=_from_class, text=_name, height=self.member_item_height, group='cmcc')
+        _togglebutton.bind(on_release=self.member_list_change)
         self.ids.member_list.add_widget(_togglebutton)
 
-
-
-    def test(self, _togglebutton_id):
+    def member_list_change(self, _togglebutton):
         # _togglebutton_id 用于分辨member_list的对方
 
-        if _togglebutton_id == self.member_list_current:
+        if _togglebutton._id == self.member_list_current:
+            _togglebutton.state = 'down'
             return
         else:
-            self.member_list_current = _togglebutton_id
-            print('1111')
+            self.member_list_current = _togglebutton._id
 
     # 发送健效果
-    def itchat_send(self):
-        _username = ''
-        if self.ids.send_to_name.text != '':
-            _name = itchat.search_friends(name=self.ids.send_to_name.text)
+    def msg_send(self):
+        _name = itchat.search_friends(name=self.member_list_current)
             # _chatroom= itchat.get_chatrooms()
             _chatroom = itchat.search_chatrooms(name=self.ids.send_to_name.text)
             # _name_2 = itchat.search_chatrooms(userName=self.ids.send_to_name.text)
@@ -148,8 +141,6 @@ class KivyWindow(Widget):
                 _username = _chatroom[0].UserName
             else:
                 self.ids.send_to_name.text = '找不到资料'
-
-
         else:
             _username = ''
         itchat.send(self.ids.weixin_textinput.text, toUserName=_username)

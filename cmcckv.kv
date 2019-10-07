@@ -35,11 +35,12 @@
                 height:root.member_item_height*root.member_item_count
                 MemberList_ToggleButton:
                     _id:'my'
+                    _class:'personal'
                     text:'my'
                     height:root.member_item_height
                     group:'cmcc'
                     state:'down'
-                    on_release:root.test(self._id)
+                    on_release:root.member_list_change(self)
 
 
 
