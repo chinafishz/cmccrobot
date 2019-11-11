@@ -3,11 +3,12 @@ from dic import order_dic
 import iot_system
 from bs4 import BeautifulSoup
 import importlib as imp
+import requests
 
 
 send_sms1 = '41608446240A6782F2A0F031426EDC066CF24674F3F0586A4D5FF056D75FF4AB'
-send_sms2 = '41608446240A6782F2A0F031426EDC066CF24674F3F0586AF1E3983438A092961588230AE57DFFA4938B6BEDBBA3956A6069ED5C9B03B580'
-cn_pwd_saw = 'Qwer!234'
+send_sms2 = '41608446240A6782F2A0F031426EDC066CF24674F3F0586AF1E3983438A092966F9B57FEF7B22FB7D01E1BDF5B4421CB6069ED5C9B03B580'
+cn_pwd_saw = 'QWer!@34'
 
 
 def process_a05(_split):
@@ -142,11 +143,17 @@ def process_a08(_input_property, _order_require):
 
 
 class CnMsgProcess:
-    def __init__(self, cn_order_list, cn_chat_list, cn_config_list, r):
-        self.order_list = cn_order_list
-        self.chat_list = cn_chat_list
-        self.config_list = cn_config_list
-        self.r = r
+    def __init__(self):
+        self.order_list = {}
+        # order_list表示待办理的命令
+        
+        self.chat_list = {}
+        # chart_list表示待回复的对话
+        
+        self.config_list = {}
+        # 同步一些配置和开关
+        
+        self.r = requests.session()
         self.proxy_load = cn_system.proxy_load()
 
 

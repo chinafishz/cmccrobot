@@ -1,6 +1,6 @@
 #:kivy 1.0.9
 
-# 对话框背景（灰色）
+# backgroud color
 <BackgroundColor>
     background_color: 0.5, 0.5, 0.5, 0.5
     canvas.before:
@@ -11,10 +11,12 @@
             pos: self.pos
 
 
-# 主类
+# main class
 <KivyWindow>:
+	Widget:
+		id:label_temp
 
-    # 左栏
+    # left
     LeftWidget:
         size: 190,root.height
         pos:5,0
@@ -22,6 +24,7 @@
             size: self.parent.width,30
             pos:5,root.height-35
             TextInput:
+            	on_text_validate:print('u')
 
 
         ScrollClass:
@@ -44,19 +47,20 @@
 
 
 
-    # 中栏
+
+    # middle
     Widget:
         size: root.width-390,root.height
         pos:195,0
 
-        # 对话区的标题
+        # chat title
         BoxLayout:
             size: root.width-390,30
             pos:195,root.height-35
             Label:
-                text:'名称'
+                text:'name'
 
-        # 对话框
+        # chat window
         BackgroundColor:
             size: root.width-390,root.height-110
             pos:195,65
@@ -65,40 +69,26 @@
                 size: root.width-390,root.height-110
                 pos:195,65
                 scroll_y:0
-                # 每个按钮高度为50
 
-
-        # 对话区的输入框
+        # chat input
         BoxLayout:
-            size: root.width-390,30
-            pos:195,30
+            size: root.width-390,60
+            pos:195,0
             TextInput:
-                id:to_username
-                # 输入收信息的人
-
-                size_hint_x:0.4
+				id:weixin_textinput
+                size_hint_x:0.6
                 text:''
             Button:
                 size_hint_x:0.2
-                text:'发送'
-                on_release:root.chat_send()
+                text:'send'
+                on_release:root.msg_send()
             Button:
-                size_hint_x:0.25
-                text:'增加聊天框'
-                on_release:root.add_member_list('222')
+            	size_hint_x:0.2
+            	text:'pic'
+            	on_release:root.send_pic()
             Button:
-                size_hint_x:0.25
-                text:'更新聊天框'
-                on_release:root.add_member_list()
-            Button:
-                size_hint_x:0.25
-                text:'启动itchat'
+                size_hint_x:0.2
+                text:'itchat'
                 on_release:root.itchat_start()
-
-        TextInput:
-            id:weixin_textinput
-            size: root.width-390,30
-            pos:195,0
-
 
 
