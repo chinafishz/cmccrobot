@@ -46,21 +46,11 @@ order_dic = {
             'param_count': 1,
             'system': 'iot',
             'actual_order': '#iot_puk',
+            'whitelist': ['深**徕纳智能科技有限公司', '深**禾锐通信有限公司','统**信(苏州)有限公司广州分公司', '统**信（苏州）有限公司广州分公司'],
             1: {
                 'name': '物联网号码',
                 'property': {'type': int, 'length': [13,11], 'first_num': '1'},
                 }
-        },
-    '#查校验码':
-        {
-            'id': 1001,
-            'param_count': 1,
-            'system': 'iot',
-            'actual_order': '#iot_puk',
-            1: {
-                'name': '物联网号码',
-                'property': {'type': int, 'length': [13, 11], 'first_num': '1'},
-            }
         },
     '#查实名':
         {

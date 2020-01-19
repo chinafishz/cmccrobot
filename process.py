@@ -6,9 +6,9 @@ import importlib as imp
 import requests
 
 
-send_sms1 = '41608446240A6782F2A0F031426EDC066CF24674F3F0586A4D5FF056D75FF4AB'
-send_sms2 = '41608446240A6782F2A0F031426EDC066CF24674F3F0586AF1E3983438A092966F9B57FEF7B22FB7D01E1BDF5B4421CB6069ED5C9B03B580'
-cn_pwd_saw = 'QWer!@34'
+send_sms1 = ''
+send_sms2 = ''
+cn_pwd_saw = ''
 
 
 def process_a05(_split):
@@ -294,12 +294,18 @@ class CnMsgProcess:
 
             if _actual_order == '#iot_puk':
                 try:
-                    iot_system.iot_phone_query_base(_r, _order_param.get(1), _proxies, _auth)
+                    # 要求返回公司名称
+                    _entityName =iot_system.iot_phone_query_base(_r, _order_param.get(1), _proxies, _auth, 'name')
                     _result = iot_system.iot_puk(_r, _proxies, _auth)
                 except:
                     return 'error', _order_param.get(1) + '的puk查询失败，没有查询结果，请检查输入的号码'
                 else:
-                    return 'success', _order_param.get(1) + 'puk为：' + _result
+                    # 判断是否为白名单公司
+                    if _entityName in order_dic['#puk']['whitelist']:
+                        return 'success', _order_param.get(1) + 'puk为：' + _result
+                    else:
+                        return 'Warning', _order_param.get(1) + 'puk为：' + _result, _order_param.get(1) + '公司名称为：' + _entityName
+
                 finally:
                     del self.order_list[_from_username][_order_name]
 

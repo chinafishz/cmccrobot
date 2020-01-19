@@ -1,5 +1,6 @@
 #:kivy 1.0.9
 
+
 # backgroud color
 <BackgroundColor>
     background_color: 0.5, 0.5, 0.5, 0.5
@@ -10,21 +11,46 @@
             size: self.size
             pos: self.pos
 
+<MemberList_ToggleButton111>
+	height:root.btn_height
+    group:'cmcc'
+    Widget:
+        pos:self.parent.pos
+        Image:
+            source:root.img_path
+            size: 40,40
+            pos:10,self.parent.pos[1]+(root.btn_height-self.size[0])/2
+        Label:
+            pos:120,self.parent.pos[1]
+            text:root.btn_text
+            font_size:14
+            halign:'left'
+            text_size:root.btn_texture_size
+
+
 
 # main class
 <KivyWindow>:
-	Widget:
-		id:label_temp
-
     # left
     LeftWidget:
-        size: 190,root.height
+        size: root.kivy_config_layout['LayoutSize']['left_size'], root.height
         pos:5,0
         BoxLayout:
-            size: self.parent.width,30
+            size: self.parent.width-5,30
             pos:5,root.height-35
             TextInput:
-            	on_text_validate:print('u')
+            	id:contact_textinput_name
+            	myid:'contact_textinput_name'
+            	size_hint_x:0.85
+            	font_size:12
+            	keyboard_on_key_down:root.key_process_down
+            	keyboard_on_key_up:root.key_process_up
+            	text_language:'zh_CN'
+            Button:
+            	size_hint_x:0.15
+            	text:"搜"
+            	font_size:12
+            	on_release:root.search_contact()
 
 
         ScrollClass:
@@ -36,59 +62,132 @@
                 orientation:'bt-lr'
                 id:member_list
                 height:root.member_item_height*root.member_item_count
-                MemberList_ToggleButton:
-                    _id:'my'
-                    _class:'personal'
-                    text:'my'
-                    height:root.member_item_height
-                    group:'cmcc'
-                    state:'down'
-                    on_release:root.member_list_change(self)
 
+            #MemberList_ToggleButton:
+             #   	id:togglebutton_filehelper
+            #        _id:'filehelper'
+            #        btn_text:'my'
+             #       on_release:root.member_list_change(self)
+             #       state:'down'
 
-
-
-    # middle
-    Widget:
-        size: root.width-390,root.height
-        pos:195,0
+    MiddleWidget:
+        size: root.width-root.kivy_config_layout['LayoutSize']['left_size']-root.kivy_config_layout['LayoutSize']['right_size'], root.height
+        pos:root.kivy_config_layout['LayoutSize']['left_size']+5, 0
 
         # chat title
         BoxLayout:
-            size: root.width-390,30
-            pos:195,root.height-35
+            size:self.parent.size[0],30
+            pos:root.kivy_config_layout['LayoutSize']['left_size']+5, root.height-35
             Label:
-                text:'name'
+                id:chat_title
+                text:'my'
+                size_hint_x:0.85
+            CheckBox:
+                id:title_checkbox_is_mute
+                size_hint_x:0.05
+                active:False
+            Label:
+                text:'静音'
+                size_hint_x:0.1
 
         # chat window
         BackgroundColor:
-            size: root.width-390,root.height-110
-            pos:195,65
+            size: self.parent.size[0], root.height-110
+            pos:root.kivy_config_layout['LayoutSize']['left_size']+5,65
             ScrollClass:
                 id:chat_scroll
                 size: root.width-390,root.height-110
-                pos:195,65
+                pos:root.kivy_config_layout['LayoutSize']['left_size']+5,65
                 scroll_y:0
 
         # chat input
         BoxLayout:
-            size: root.width-390,60
-            pos:195,0
+            size: self.parent.size[0], 60
+            pos:root.kivy_config_layout['LayoutSize']['left_size']+5, 0
             TextInput:
 				id:weixin_textinput
+				myid:'weixin_textinput'
                 size_hint_x:0.6
                 text:''
+                font_name:root.cn_font_1
+            	font_size:12
+            	keyboard_on_key_down:root.key_process_down
+            	keyboard_on_key_up:root.key_process_up
             Button:
                 size_hint_x:0.2
                 text:'send'
                 on_release:root.msg_send()
             Button:
             	size_hint_x:0.2
-            	text:'pic'
-            	on_release:root.send_pic()
-            Button:
-                size_hint_x:0.2
-                text:'itchat'
-                on_release:root.itchat_start()
+            	text:'File'
+            	on_release:root.send_file()
+
+    RightWidget:
+    	size: root.kivy_config_layout['LayoutSize']['right_size'], root.height
+        pos:root.width-root.kivy_config_layout['LayoutSize']['right_size']+5, 0
+        TabbedPanel:
+            pos:self.parent.pos
+            size:self.parent.size
+            do_default_tab:False
+            TabbedPanelItem:
+                text:'系统'
+                BoxLayout:
+                    Switch:
+                        text:'1111'
+                        size_hint:None,None
+                        active:True
+                    Button:
+                        text:'itchat'
+                        size_hint:None,None
+                        on_release:root.itchat_start()
+
+            TabbedPanelItem:
+                text:'IOT'
 
 
+
+<FileChoosDialog>
+	orientation:'vertical'
+	BoxLayout:
+		size_hint_y:0.05
+		TextInput:
+			size_hint_x:0.7
+			text:filechooser.path
+		Button:
+			size_hint_x:0.05
+			text:'列'
+			on_release:filechooser.view_mode = 'list'
+		Button:
+			size_hint_x:0.05
+			text:'图'
+			on_release:filechooser.view_mode = 'icon'
+		TextInput:
+		    id:fiter_textinput
+			size_hint_x:0.15
+			text:''
+		Button:
+			size_hint_x:0.05
+			text:'筛'
+			on_release:filechooser.filters = ['*'+fiter_textinput.text+'*']
+		
+	FileChooser:
+		id:filechooser
+		path:'.'
+		size_hint_y:0.95
+		filters:''
+		multiselect:False
+		filter_dirs:True
+		on_submit:root.load(root.window, self.selection[0])
+		FileChooserIconLayout
+		FileChooserListLayout
+
+	BoxLayout:
+		size_hint_y:0.1
+		Button:
+			text:'close'
+		Button:
+			text:'load'
+			on_release:root.load(root.window, filechooser.selection[0])
+
+
+		
